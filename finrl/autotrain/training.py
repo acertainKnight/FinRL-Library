@@ -21,7 +21,7 @@ def train_one():
     train an agent
     """
     print("==============Start Fetching Data===========")
-    df = YahooDownloader(
+    df =f YahooDownloader(
         start_date=config.START_DATE,
         end_date=config.END_DATE,
         ticker_list=config.DOW_30_TICKER,
