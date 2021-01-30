@@ -14,7 +14,7 @@ from finrl.marketdata.yahoodownloader import YahooDownloader
 from finrl.preprocessing.preprocessors import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
-from finrl.model.models import DRLAgent
+from finrl.model.models import DRLAgent, DRLEnsembleAgent
 from finrl.trade.backtest import backtest_plot, backtest_stats
 import os
 import multiprocessing
@@ -57,17 +57,17 @@ def main():
     information_cols = ['daily_variance', 'change', 'log_volume', 'close', 'day',
                         'macd', 'rsi_30', 'cci_30', 'dx_30']
 
-    e_train_gym = StockTradingEnvCashpenalty(df=train, initial_amount=1e6, hmax=5000,
+    e_train_gym = StockTradingEnvCashpenalty(df=train, initial_amount=1e5, hmax=5000,
                                              cache_indicator_data=True,
-                                             cash_penalty_proportion=0.2,
+                                             cash_penalty_proportion=0.1,
                                              daily_information_cols=information_cols,
-                                             print_verbosity=500, random_start=True)
+                                             print_verbosity=1000, random_start=True)
 
-    e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e6, hmax=5000,
-                                             cash_penalty_proportion=0.2,
+    e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e5, hmax=5000,
+                                             cash_penalty_proportion=0.1,
                                              cache_indicator_data=True,
                                              daily_information_cols=information_cols,
-                                             print_verbosity=500, random_start=False)
+                                             print_verbosity=1000, random_start=False)
 
 
 
@@ -85,56 +85,53 @@ def main():
 
     agent = DRLAgent(env=env_train)
 
-    ppo_params = {'n_steps': 256,
-                  'ent_coef': 0.0,
-                  'learning_rate': 0.000005,
-                  'batch_size': 1024,
-                  'gamma': 0.99}
+    # ppo_params = {'n_steps': 256,
+    #               'ent_coef': 0.0,
+    #               'learning_rate': 0.000005,
+    #               'batch_size': 1024,
+    #               'gamma': 0.99}
+    #
+    # policy_kwargs = {
+    #     #     "activation_fn": ReLU,
+    #     "net_arch": [1024 for _ in range(10)],
+    #     #     "squash_output": True
+    # }
+    for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
+        print('Training: {}'.format(strat))
+        model = agent.get_model(strat, verbose=0)
 
-    policy_kwargs = {
-        #     "activation_fn": ReLU,
-        "net_arch": [1024 for _ in range(10)],
-        #     "squash_output": True
-    }
+        model.learn(total_timesteps=1000000,
+                    eval_env=env_trade,
+                    log_interval=1,
+                    tb_log_name='env_cashpenalty_{}'.format(strat))
 
-    model = agent.get_model("ppo",
-                            model_kwargs=ppo_params,
-                            policy_kwargs=policy_kwargs, verbose=0)
+        model.save("{}.model".format(strat))
 
-    model.learn(total_timesteps=5000000,
-                eval_env=env_trade,
-                eval_freq=500,
-                log_interval=1,
-                tb_log_name='env_cashpenalty_highlr',
-                n_eval_episodes=1)
-
-    model.save("different1_24.model")
-
-    trade.head()
-
-    e_trade_gym.hmax = 5000
-
-    print(len(e_trade_gym.dates))
-
-    df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
-
-    df_actions.head()
-
-    df_account_value.shape
-
-    df_account_value.head(50)
-
-    print("==============Get Backtest Results===========")
-    perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
-
-    print("==============Compare to DJIA===========")
-    # S&P 500: ^GSPC
-    # Dow Jones Index: ^DJI
-    # NASDAQ 100: ^NDX
-    backtest_plot(df_account_value,
-                  baseline_ticker='^DJI',
-                  baseline_start='2016-01-01',
-                  baseline_end='2021-01-01', value_col_name='total_assets')
+    # trade.head()
+    #
+    # e_trade_gym.hmax = 5000
+    #
+    # print(len(e_trade_gym.dates))
+    #
+    # df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
+    #
+    # df_actions.head()
+    #
+    # df_account_value.shape
+    #
+    # df_account_value.head(50)
+    #
+    # print("==============Get Backtest Results===========")
+    # perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
+    #
+    # print("==============Compare to DJIA===========")
+    # # S&P 500: ^GSPC
+    # # Dow Jones Index: ^DJI
+    # # NASDAQ 100: ^NDX
+    # backtest_plot(df_account_value,
+    #               baseline_ticker='^DJI',
+    #               baseline_start='2016-01-01',
+    #               baseline_end='2021-01-01', value_col_name='total_assets')
 
 if __name__ == "__main__":
     main()
