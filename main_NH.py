@@ -51,19 +51,19 @@ def main():
     processed['daily_variance'] = np.divide(np.subtract(processed.high.values, processed.low.values),
                                             processed.close.values)
 
-    train = data_split(processed, '2009-01-01', '2016-01-01')
-    trade = data_split(processed, '2016-01-01', '2021-01-01')
+    train = data_split(processed, config.START_DATE, config.START_TRADE_DATE)
+    trade = data_split(processed, config.START_TRADE_DATE, config.END_DATE)
 
     information_cols = ['daily_variance', 'change', 'log_volume', 'close', 'day',
                         'macd', 'rsi_30', 'cci_30', 'dx_30']
 
-    e_train_gym = StockTradingEnvCashpenalty(df=train, initial_amount=1e5, hmax=5000,
+    e_train_gym = StockTradingEnvCashpenalty(df=train, initial_amount=1e5, hmax=50,
                                              cache_indicator_data=True,
                                              cash_penalty_proportion=0.1,
                                              daily_information_cols=information_cols,
                                              print_verbosity=1000, random_start=True)
 
-    e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e5, hmax=5000,
+    e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e5, hmax=50,
                                              cash_penalty_proportion=0.1,
                                              cache_indicator_data=True,
                                              daily_information_cols=information_cols,
