@@ -48,7 +48,11 @@ class YahooDownloader:
         for tic in self.ticker_list:
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
             temp_df["tic"] = tic
-            data_df = data_df.append(temp_df)
+            date_df = pd.DataFrame(index=pd.date_range(start=self.start_date,
+                                                       end=self.end_date,
+                                                       freq='D'))
+            temp_date_df = pd.merge(date_df, temp_df, how='left')
+            data_df = data_df.append(temp_date_df)
         # reset the index, we want to use numbers as index instead of dates
         data_df = data_df.reset_index()
         try:
@@ -73,8 +77,9 @@ class YahooDownloader:
         data_df["day"] = data_df["date"].dt.dayofweek
         # convert date to standard string format, easy to filter
         data_df["date"] = data_df.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+        data_df = data_df[data_df['day'] < 5]
         # drop missing data
-        data_df = data_df.dropna()
+        data_df = data_df.fillna(0)
         data_df = data_df.reset_index(drop=True)
         print("Shape of DataFrame: ", data_df.shape)
         # print("Display DataFrame: ", data_df.head())

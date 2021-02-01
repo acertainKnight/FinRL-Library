@@ -57,7 +57,7 @@ class FeatureEngineer:
         if self.user_defined_feature == True:
             df = self.add_user_defined_feature(df)
             print("Successfully added user defined features")
-
+        df = df.shift(1)
         # fill the missing values at the beginning and the end
         df = df.fillna(method="bfill").fillna(method="ffill")
         return df
@@ -94,11 +94,23 @@ class FeatureEngineer:
         :return: (df) pandas dataframe
         """
         df = data.copy()
-        df["daily_return"] = df.close.pct_change(1)
-        # df['return_lag_1']=df.close.pct_change(2)
-        # df['return_lag_2']=df.close.pct_change(3)
-        # df['return_lag_3']=df.close.pct_change(4)
-        # df['return_lag_4']=df.close.pct_change(5)
+        unique_ticker = df.tic.unique()
+        daily_return_df = pd.DataFrame()
+        for i in range(len(unique_ticker)):
+            try:
+                temp_indicator = df[df.tic == unique_ticker[i]].close.pct_change(1)
+                temp_indicator = pd.DataFrame(temp_indicator)
+                daily_return_df = daily_return_df.append(
+                    temp_indicator, ignore_index=True
+                )
+            except Exception as e:
+                print(e)
+        df["daily_return"] = daily_return_df
+
+        df['log_volume'] = np.log(df.volume * df.close)
+        df['change'] = np.divide(np.subtract(df.close.values, df.open.values), df.close.values)
+        df['daily_variance'] = np.divide(np.subtract(df.high.values, df.low.values), df.close.values)
+
         return df
 
     def add_turbulence(self, data):

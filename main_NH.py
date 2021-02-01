@@ -35,21 +35,15 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.DOW_30_TICKER).fetch_data()
+                         ticker_list=config.SP_500_TICKER).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
-        use_turbulence=False,
-        user_defined_feature=False)
+        use_turbulence=True,
+        user_defined_feature=True)
 
     processed = fe.preprocess_data(df)
-
-    processed['log_volume'] = np.log(processed.volume * processed.close)
-    processed['change'] = np.divide(np.subtract(processed.close.values, processed.open.values),
-                                    processed.close.values)
-    processed['daily_variance'] = np.divide(np.subtract(processed.high.values, processed.low.values),
-                                            processed.close.values)
 
     train = data_split(processed, config.START_DATE, config.START_TRADE_DATE)
     trade = data_split(processed, config.START_TRADE_DATE, config.END_DATE)
@@ -61,13 +55,13 @@ def main():
                                              cache_indicator_data=True,
                                              cash_penalty_proportion=0.1,
                                              daily_information_cols=information_cols,
-                                             print_verbosity=1000, random_start=True)
+                                             print_verbosity=10, random_start=True)
 
     e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e5, hmax=50,
                                              cash_penalty_proportion=0.1,
                                              cache_indicator_data=True,
                                              daily_information_cols=information_cols,
-                                             print_verbosity=1000, random_start=False)
+                                             print_verbosity=10, random_start=False)
 
 
 
