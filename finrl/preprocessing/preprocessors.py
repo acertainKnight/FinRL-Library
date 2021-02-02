@@ -120,18 +120,15 @@ class FeatureEngineer:
         for series in ['EFFR', 'UNRATE', 'DEXUSEU', 'TEDRATE', 'DTWEXBGS',
                        'VIXCLS', 'DEXCHUS', 'USRECD', 'DTWEXEMEGS', 'VXEEMCLS',
                        'A191RL1Q225SBEA', 'GFDEGDQ188S', 'DPCERL1Q225SBEA']:
-            try:
-                data = fred.get_series(series)
-                data = data.to_frame()
-                data = data.reset_index()
-                data.columns = [
-                    "date",
-                    series
-                ]
-                data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
-            except:
-                print('Failed: {}'.format(series))
-                continue
+
+            data = fred.get_series(series)
+            data = data.to_frame()
+            data = data.reset_index()
+            data.columns = [
+                "date",
+                series
+            ]
+            data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
             df = pd.merge(df, data, how='left', left_on='date', right_on='date')
 
         return df

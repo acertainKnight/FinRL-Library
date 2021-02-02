@@ -4,6 +4,8 @@ Yahoo Finance API
 
 import pandas as pd
 import yfinance as yf
+from datetime import datetime, timedelta
+
 
 
 class YahooDownloader:
@@ -45,20 +47,30 @@ class YahooDownloader:
         """
         # Download and save the data in a pandas DataFrame:
         data_df = pd.DataFrame()
+        i = 0
+        d_list = self.date_list()
         for tic in self.ticker_list:
+            if i == 50:
+                break
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
-            print(temp_df.index[0])
-            print(temp_df.index[-1])
-            date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
-                                                       end=self.end_date,
-                                                       freq='D').to_list()})
-            temp_date_df = pd.merge(date_df, temp_df, how='left', left_on='date_y', right_index=True)
+            if temp_df.index[0] not in d_list:
+                # date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
+                #                                            end=self.end_date,
+                #                                            freq='D').to_list()})
+                # temp_date_df = pd.merge(date_df, temp_df, how='left', left_on='date_y', right_index=True)
+                # temp_date_df = temp_date_df.fillna(-9999)
+                print('Tic not available over period; {}'.format(tic))
+                continue
+            else:
+                temp_date_df = temp_df.copy()
             temp_date_df["tic"] = tic
             temp_date_df.drop_duplicates(inplace=True)
             data_df = data_df.append(temp_date_df)
+            i += 1
         # reset the index, we want to use numbers as index instead of dates
         data_df = data_df.reset_index()
-        data_df.drop('index', axis=1, inplace=True)
+        print(list(data_df))
+        # data_df.drop('index', axis=1, inplace=True)
         try:
             # convert the column names to standardized names
             data_df.columns = [
@@ -84,7 +96,6 @@ class YahooDownloader:
         data_df = data_df[data_df['day'] < 5]
         # drop missing data
 #         data_df = data_df.fillna(-1)
-        data_df.to_csv('yahoo.csv')
         data_df = data_df.dropna()
         data_df = data_df.reset_index(drop=True)
         print("Shape of DataFrame: ", data_df.shape)
@@ -105,3 +116,11 @@ class YahooDownloader:
         select_stocks_list = list(names[equal_list])
         df = df[df.tic.isin(select_stocks_list)]
         return df
+
+    def date_list(self):
+        s = self.start_date
+        date = datetime.strptime(s, "%Y-%m-%d")
+        dates = []
+        for i in range(1, 3):
+            dates.append(date + timedelta(days=i))
+        return dates
