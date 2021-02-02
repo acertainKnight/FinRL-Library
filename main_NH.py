@@ -88,34 +88,43 @@ def main():
 
     agent = DRLAgent(env=env_train)
 
-    # # from torch.nn import Softsign, ReLU
-    # ppo_params ={'n_steps': 256,
-    #              'ent_coef': 0.0,
-    #              'learning_rate': 0.0005,
-    #              'batch_size': 1024,
-    #             'gamma': 0.99}
-    #
-    # policy_kwargs = {
-    # #     "activation_fn": ReLU,
-    #     "net_arch": [1024 for _ in range(10)],
-    # #     "squash_output": True
-    # }
+    # from torch.nn import Softsign, ReLU
+    ppo_params ={'n_steps': 256,
+                 'ent_coef': 0.0,
+                 'learning_rate': 0.0005,
+                 'batch_size': 1024,
+                'gamma': 0.99}
+    
+    policy_kwargs = {
+    #     "activation_fn": ReLU,
+        "net_arch": [1024 for _ in range(10)],
+    #     "squash_output": True
+    }
 
-    # model = agent.get_model("ppo",
-    #                         model_kwargs = ppo_params,
-    #                         policy_kwargs = policy_kwargs, verbose = 0)
+    model = agent.get_model("ppo",
+                            model_kwargs = ppo_params,
+                            policy_kwargs = policy_kwargs, verbose = 1)
+    
+    model.learn(total_timesteps = 5000000,
+                eval_env = env_trade,
+                eval_freq = 500,
+                log_interval = 1,
+                tb_log_name = 'env_cashpenalty_PPO',
+                n_eval_episodes = 1)
+    
+    model.save("different1_PPO.model")
 
     # model = model.load("scaling_reward.model", env = env_train)
-    for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
-        model = agent.get_model(strat, verbose=0)
+#     for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
+#         model = agent.get_model(strat, verbose=0)
 
-        model.learn(total_timesteps = 5000000,
-                    eval_env = env_trade,
-                    eval_freq = 500,
-                    log_interval = 1,
-                    tb_log_name = 'env_cashpenalty_{}'.format(strat),
-                    n_eval_episodes = 1)
-        model.save("different1_{}.model".format(strat))
+#         model.learn(total_timesteps = 5000000,
+#                     eval_env = env_trade,
+#                     eval_freq = 500,
+#                     log_interval = 1,
+#                     tb_log_name = 'env_cashpenalty_{}'.format(strat),
+#                     n_eval_episodes = 1)
+#         model.save("different1_{}.model".format(strat))
 
     # e_trade_gym.hmax = 5000
     #
