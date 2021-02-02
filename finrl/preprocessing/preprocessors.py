@@ -57,7 +57,7 @@ class FeatureEngineer:
         if self.user_defined_feature == True:
             df = self.add_user_defined_feature(df)
             print("Successfully added user defined features")
-        df = df.shift(1)
+#         df = df.shift(1)
         # fill the missing values at the beginning and the end
         df = df.fillna(method="bfill").fillna(method="ffill")
         df.drop_duplicates(inplace=True)
@@ -106,6 +106,7 @@ class FeatureEngineer:
                 )
             except Exception as e:
                 print(e)
+                
         df["daily_return"] = daily_return_df.values
 
         df['log_volume'] = np.log(df.volume * df.close)

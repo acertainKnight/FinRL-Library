@@ -35,7 +35,7 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.DOW_30_TICKER).fetch_data()
+                         ticker_list=config.NAS_100_TICKER).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
@@ -53,18 +53,24 @@ def main():
     print(information_cols)
     information_cols.remove('date')
     information_cols.remove('tic')
+    
+#     information_cols = ['daily_variance', 'change', 'log_volume', 'close','day', 
+#                     'macd', 'rsi_30', 'cci_30', 'dx_30']
 
-    e_train_gym = StockTradingEnvCashpenalty(df=train, initial_amount=1e5, hmax=50,
-                                             cache_indicator_data=True,
-                                             cash_penalty_proportion=0.1,
-                                             daily_information_cols=information_cols,
-                                             print_verbosity=1, random_start=True)
+    e_train_gym = StockTradingEnvCashpenalty(df = train,initial_amount = 10000,hmax = 100, 
+                                    cache_indicator_data=True,
+                                    cash_penalty_proportion=0.2, 
+                                    daily_information_cols = information_cols, 
+                                    print_verbosity = 500, random_start = True)
 
-    e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e5, hmax=50,
-                                             cash_penalty_proportion=0.1,
-                                             cache_indicator_data=True,
-                                             daily_information_cols=information_cols,
-                                             print_verbosity=1, random_start=False)
+
+
+
+    e_trade_gym = StockTradingEnvCashpenalty(df = trade,initial_amount = 10000,hmax = 100, 
+                                    cash_penalty_proportion=0.2,
+                                    cache_indicator_data=True,
+                                    daily_information_cols = information_cols, 
+                                    print_verbosity = 500, random_start = False)
 
 
 
@@ -82,62 +88,50 @@ def main():
 
     agent = DRLAgent(env=env_train)
 
-#     ppo_params = {'n_steps': 256,
-#                   'ent_coef': 0.0,
-#                   'learning_rate': 0.000005,
-#                   'batch_size': 1024,
-#                   'gamma': 0.99}
-    
-#     policy_kwargs = {
-#         #     "activation_fn": ReLU,
-#         "net_arch": [1024 for _ in range(10)],
-#         #     "squash_output": True
-#     }
-#     for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
-#         print('Training: {}'.format(strat))
-#         model = agent.get_model(strat, verbose=0)
+    # from torch.nn import Softsign, ReLU
+    ppo_params ={'n_steps': 256, 
+                 'ent_coef': 0.0, 
+                 'learning_rate': 0.0005, 
+                 'batch_size': 1024, 
+                'gamma': 0.99}
 
-#         model.learn(total_timesteps=1000000,
-#                     eval_env=env_trade,
-#                     log_interval=1,
-#                     tb_log_name='env_cashpenalty_{}'.format(strat))
+    policy_kwargs = {
+    #     "activation_fn": ReLU,
+        "net_arch": [1024 for _ in range(10)], 
+    #     "squash_output": True
+    }
 
-#         model.save("{}.model".format(strat))
+    model = agent.get_model("ppo",  
+                            model_kwargs = ppo_params, 
+                            policy_kwargs = policy_kwargs, verbose = 0)
+
+    # model = model.load("scaling_reward.model", env = env_train)
         
     model = agent.get_model('ppo', verbose=1)
 
-    model.learn(total_timesteps=1000000,
-                eval_env=env_trade,
-                log_interval=1,
-                tb_log_name='env_cashpenalty_PPO')
+    model.learn(total_timesteps = 5000000, 
+                eval_env = env_trade, 
+                eval_freq = 500,
+                log_interval = 1, 
+                tb_log_name = 'env_cashpenalty_highlr',
+                n_eval_episodes = 1)
+    model.save("different1_24.model")
 
-    # model.save("{}.model".format(strat))
+    e_trade_gym.hmax = 5000
+    
+    df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
 
-    # trade.head()
-    #
-    # e_trade_gym.hmax = 5000
-    #
-    # print(len(e_trade_gym.dates))
-    #
-    # df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
-    #
-    # df_actions.head()
-    #
-    # df_account_value.shape
-    #
-    # df_account_value.head(50)
-    #
-    # print("==============Get Backtest Results===========")
-    # perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
-    #
-    # print("==============Compare to DJIA===========")
-    # # S&P 500: ^GSPC
-    # # Dow Jones Index: ^DJI
-    # # NASDAQ 100: ^NDX
-    # backtest_plot(df_account_value,
-    #               baseline_ticker='^DJI',
-    #               baseline_start='2016-01-01',
-    #               baseline_end='2021-01-01', value_col_name='total_assets')
+    print("==============Get Backtest Results===========")
+    perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
+    
+    print("==============Compare to DJIA===========")
+    # S&P 500: ^GSPC
+    # Dow Jones Index: ^DJI
+    # NASDAQ 100: ^NDX
+    backtest_plot(df_account_value,
+                  baseline_ticker='^DJI',
+                  baseline_start=config.START_TRADE_DATE,
+                  baseline_end=config.END_DATE, value_col_name='total_assets')
 
 if __name__ == "__main__":
     main()

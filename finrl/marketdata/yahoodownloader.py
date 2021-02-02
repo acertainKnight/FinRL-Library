@@ -83,6 +83,7 @@ class YahooDownloader:
         data_df = data_df[data_df['day'] < 5]
         # drop missing data
         data_df = data_df.fillna(0)
+        data_df = data_df.dropna()
         data_df = data_df.reset_index(drop=True)
         print("Shape of DataFrame: ", data_df.shape)
         # print("Display DataFrame: ", data_df.head())
