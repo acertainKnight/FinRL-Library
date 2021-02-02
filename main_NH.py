@@ -74,7 +74,7 @@ def main():
 
 
 
-    n_cores = multiprocessing.cpu_count() - 2
+    n_cores = multiprocessing.cpu_count()
     # n_cores = 24
     print(f"using {n_cores} cores")
 
@@ -88,50 +88,50 @@ def main():
 
     agent = DRLAgent(env=env_train)
 
-    # from torch.nn import Softsign, ReLU
-    ppo_params ={'n_steps': 256, 
-                 'ent_coef': 0.0, 
-                 'learning_rate': 0.0005, 
-                 'batch_size': 1024, 
-                'gamma': 0.99}
+    # # from torch.nn import Softsign, ReLU
+    # ppo_params ={'n_steps': 256,
+    #              'ent_coef': 0.0,
+    #              'learning_rate': 0.0005,
+    #              'batch_size': 1024,
+    #             'gamma': 0.99}
+    #
+    # policy_kwargs = {
+    # #     "activation_fn": ReLU,
+    #     "net_arch": [1024 for _ in range(10)],
+    # #     "squash_output": True
+    # }
 
-    policy_kwargs = {
-    #     "activation_fn": ReLU,
-        "net_arch": [1024 for _ in range(10)], 
-    #     "squash_output": True
-    }
-
-    model = agent.get_model("ppo",  
-                            model_kwargs = ppo_params, 
-                            policy_kwargs = policy_kwargs, verbose = 0)
+    # model = agent.get_model("ppo",
+    #                         model_kwargs = ppo_params,
+    #                         policy_kwargs = policy_kwargs, verbose = 0)
 
     # model = model.load("scaling_reward.model", env = env_train)
-        
-    model = agent.get_model('ppo', verbose=1)
+    for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
+        model = agent.get_model(strat, verbose=0)
 
-    model.learn(total_timesteps = 5000000, 
-                eval_env = env_trade, 
-                eval_freq = 500,
-                log_interval = 1, 
-                tb_log_name = 'env_cashpenalty_highlr',
-                n_eval_episodes = 1)
-    model.save("different1_24.model")
+        model.learn(total_timesteps = 5000000,
+                    eval_env = env_trade,
+                    eval_freq = 500,
+                    log_interval = 1,
+                    tb_log_name = 'env_cashpenalty_{}'.format(strat),
+                    n_eval_episodes = 1)
+        model.save("different1_{}.model".format(strat))
 
-    e_trade_gym.hmax = 5000
-    
-    df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
-
-    print("==============Get Backtest Results===========")
-    perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
-    
-    print("==============Compare to DJIA===========")
-    # S&P 500: ^GSPC
-    # Dow Jones Index: ^DJI
-    # NASDAQ 100: ^NDX
-    backtest_plot(df_account_value,
-                  baseline_ticker='^DJI',
-                  baseline_start=config.START_TRADE_DATE,
-                  baseline_end=config.END_DATE, value_col_name='total_assets')
+    # e_trade_gym.hmax = 5000
+    #
+    # df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
+    #
+    # print("==============Get Backtest Results===========")
+    # perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
+    #
+    # print("==============Compare to DJIA===========")
+    # # S&P 500: ^GSPC
+    # # Dow Jones Index: ^DJI
+    # # NASDAQ 100: ^NDX
+    # backtest_plot(df_account_value,
+    #               baseline_ticker='^DJI',
+    #               baseline_start=config.START_TRADE_DATE,
+    #               baseline_end=config.END_DATE, value_col_name='total_assets')
 
 if __name__ == "__main__":
     main()
