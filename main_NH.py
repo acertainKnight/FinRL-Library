@@ -31,11 +31,11 @@ def main():
 
     print(config.START_DATE)
     print(config.END_DATE)
-    print(config.DOW_30_TICKER)
+    print(config.BRDGWTR_50_TICKER)
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.NAS_100_TICKER).fetch_data()
+                         ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
@@ -50,7 +50,6 @@ def main():
     trade = data_split(processed, config.START_TRADE_DATE, config.END_DATE)
 
     information_cols = list(processed)
-    print(information_cols)
     information_cols.remove('date')
     information_cols.remove('tic')
     
@@ -105,7 +104,7 @@ def main():
                             model_kwargs = ppo_params,
                             policy_kwargs = policy_kwargs, verbose = 1)
     
-    model.learn(total_timesteps = 5000000,
+    model.learn(total_timesteps = 1000000,
                 eval_env = env_trade,
                 eval_freq = 500,
                 log_interval = 1,
@@ -126,21 +125,23 @@ def main():
 #                     n_eval_episodes = 1)
 #         model.save("different1_{}.model".format(strat))
 
-    # e_trade_gym.hmax = 5000
-    #
-    # df_account_value, df_actions = DRLAgent.DRL_prediction(model=model, environment=e_trade_gym)
-    #
-    # print("==============Get Backtest Results===========")
-    # perf_stats_all = backtest_stats(account_value=df_account_value, value_col_name='total_assets')
-    #
-    # print("==============Compare to DJIA===========")
-    # # S&P 500: ^GSPC
-    # # Dow Jones Index: ^DJI
-    # # NASDAQ 100: ^NDX
-    # backtest_plot(df_account_value,
-    #               baseline_ticker='^DJI',
-    #               baseline_start=config.START_TRADE_DATE,
-    #               baseline_end=config.END_DATE, value_col_name='total_assets')
+    e_trade_gym.hmax = 5000
+    
+    df_account_value, df_actions = DRLAgent.DRL_prediction(model=model,
+                                                           environment=e_trade_gym)
+    
+    print("==============Get Backtest Results===========")
+    perf_stats_all = backtest_stats(account_value=df_account_value,
+                                    value_col_name='total_assets')
+    
+    print("==============Compare to DJIA===========")
+    # S&P 500: ^GSPC
+    # Dow Jones Index: ^DJI
+    # NASDAQ 100: ^NDX
+    backtest_plot(df_account_value,
+                  baseline_ticker='^DJI',
+                  baseline_start=config.START_TRADE_DATE,
+                  baseline_end=config.END_DATE, value_col_name='total_assets')
 
 if __name__ == "__main__":
     main()

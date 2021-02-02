@@ -47,6 +47,8 @@ class YahooDownloader:
         data_df = pd.DataFrame()
         for tic in self.ticker_list:
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
+            print(temp_df.index[0])
+            print(temp_df.index[-1])
             date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
                                                        end=self.end_date,
                                                        freq='D').to_list()})
@@ -57,7 +59,6 @@ class YahooDownloader:
         # reset the index, we want to use numbers as index instead of dates
         data_df = data_df.reset_index()
         data_df.drop('index', axis=1, inplace=True)
-        print(list(data_df))
         try:
             # convert the column names to standardized names
             data_df.columns = [
@@ -82,7 +83,8 @@ class YahooDownloader:
         data_df["date"] = data_df.date.apply(lambda x: x.strftime("%Y-%m-%d"))
         data_df = data_df[data_df['day'] < 5]
         # drop missing data
-        data_df = data_df.fillna(0)
+#         data_df = data_df.fillna(-1)
+        data_df.to_csv('yahoo.csv')
         data_df = data_df.dropna()
         data_df = data_df.reset_index(drop=True)
         print("Shape of DataFrame: ", data_df.shape)

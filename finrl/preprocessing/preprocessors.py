@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from stockstats import StockDataFrame as Sdf
 from finrl.config import config
-
+from fredapi import Fred
 
 class FeatureEngineer:
     """Provides methods for preprocessing the stock price data
@@ -59,8 +59,10 @@ class FeatureEngineer:
             print("Successfully added user defined features")
 #         df = df.shift(1)
         # fill the missing values at the beginning and the end
+        df.replace([np.inf, -np.inf], np.nan)
         df = df.fillna(method="bfill").fillna(method="ffill")
         df.drop_duplicates(inplace=True)
+        print("Shape of DataFrame (w/indicators): ", df.shape)
         return df
 
     def add_technical_indicator(self, data):
@@ -86,6 +88,7 @@ class FeatureEngineer:
                 except Exception as e:
                     print(e)
             df[indicator] = indicator_df
+        
         return df
 
     def add_user_defined_feature(self, data):
@@ -112,6 +115,24 @@ class FeatureEngineer:
         df['log_volume'] = np.log(df.volume * df.close)
         df['change'] = np.divide(np.subtract(df.close.values, df.open.values), df.close.values)
         df['daily_variance'] = np.divide(np.subtract(df.high.values, df.low.values), df.close.values)
+        
+        fred = Fred(api_key='a2ca2601550a3ac2a1af260112595a8d')
+        for series in ['EFFR', 'UNRATE', 'DEXUSEU', 'TEDRATE', 'DTWEXBGS',
+                       'VIXCLS', 'DEXCHUS', 'USRECD', 'DTWEXEMEGS', 'VXEEMCLS',
+                       'A191RL1Q225SBEA', 'GFDEGDQ188S', 'DPCERL1Q225SBEA']:
+            try:
+                data = fred.get_series(series)
+                data = data.to_frame()
+                data = data.reset_index()
+                data.columns = [
+                    "date",
+                    series
+                ]
+                data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+            except:
+                print('Failed: {}'.format(series))
+                continue
+            df = pd.merge(df, data, how='left', left_on='date', right_on='date')
 
         return df
 
