@@ -60,6 +60,7 @@ class FeatureEngineer:
         df = df.shift(1)
         # fill the missing values at the beginning and the end
         df = df.fillna(method="bfill").fillna(method="ffill")
+        df.drop_duplicates(inplace=True)
         return df
 
     def add_technical_indicator(self, data):
@@ -105,7 +106,7 @@ class FeatureEngineer:
                 )
             except Exception as e:
                 print(e)
-        df["daily_return"] = daily_return_df
+        df["daily_return"] = daily_return_df.values
 
         df['log_volume'] = np.log(df.volume * df.close)
         df['change'] = np.divide(np.subtract(df.close.values, df.open.values), df.close.values)

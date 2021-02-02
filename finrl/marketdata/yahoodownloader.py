@@ -47,14 +47,17 @@ class YahooDownloader:
         data_df = pd.DataFrame()
         for tic in self.ticker_list:
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
-            temp_df["tic"] = tic
-            date_df = pd.DataFrame(index=pd.date_range(start=self.start_date,
+            date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
                                                        end=self.end_date,
-                                                       freq='D'))
-            temp_date_df = pd.merge(date_df, temp_df, how='left')
+                                                       freq='D').to_list()})
+            temp_date_df = pd.merge(date_df, temp_df, how='left', left_on='date_y', right_index=True)
+            temp_date_df["tic"] = tic
+            temp_date_df.drop_duplicates(inplace=True)
             data_df = data_df.append(temp_date_df)
         # reset the index, we want to use numbers as index instead of dates
         data_df = data_df.reset_index()
+        data_df.drop('index', axis=1, inplace=True)
+        print(list(data_df))
         try:
             # convert the column names to standardized names
             data_df.columns = [
@@ -85,7 +88,8 @@ class YahooDownloader:
         # print("Display DataFrame: ", data_df.head())
 
         data_df = data_df.sort_values(by=['date','tic']).reset_index(drop=True)
-
+        data_df.drop_duplicates(inplace=True)
+        
         return data_df
 
     def select_equal_rows_stock(self, df):

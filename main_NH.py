@@ -35,15 +35,16 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.SP_500_TICKER).fetch_data()
+                         ticker_list=config.DOW_30_TICKER).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
-        use_turbulence=True,
+        use_turbulence=False,
         user_defined_feature=True)
 
     processed = fe.preprocess_data(df)
+#     processed = df
 
     train = data_split(processed, config.START_DATE, config.START_TRADE_DATE)
     trade = data_split(processed, config.START_TRADE_DATE, config.END_DATE)
@@ -55,13 +56,13 @@ def main():
                                              cache_indicator_data=True,
                                              cash_penalty_proportion=0.1,
                                              daily_information_cols=information_cols,
-                                             print_verbosity=10, random_start=True)
+                                             print_verbosity=1, random_start=True)
 
     e_trade_gym = StockTradingEnvCashpenalty(df=trade, initial_amount=1e5, hmax=50,
                                              cash_penalty_proportion=0.1,
                                              cache_indicator_data=True,
                                              daily_information_cols=information_cols,
-                                             print_verbosity=10, random_start=False)
+                                             print_verbosity=1, random_start=False)
 
 
 
@@ -79,27 +80,36 @@ def main():
 
     agent = DRLAgent(env=env_train)
 
-    # ppo_params = {'n_steps': 256,
-    #               'ent_coef': 0.0,
-    #               'learning_rate': 0.000005,
-    #               'batch_size': 1024,
-    #               'gamma': 0.99}
-    #
-    # policy_kwargs = {
-    #     #     "activation_fn": ReLU,
-    #     "net_arch": [1024 for _ in range(10)],
-    #     #     "squash_output": True
-    # }
-    for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
-        print('Training: {}'.format(strat))
-        model = agent.get_model(strat, verbose=0)
+#     ppo_params = {'n_steps': 256,
+#                   'ent_coef': 0.0,
+#                   'learning_rate': 0.000005,
+#                   'batch_size': 1024,
+#                   'gamma': 0.99}
+    
+#     policy_kwargs = {
+#         #     "activation_fn": ReLU,
+#         "net_arch": [1024 for _ in range(10)],
+#         #     "squash_output": True
+#     }
+#     for strat in ["a2c", "ddpg", "td3", "sac", "ppo"]:
+#         print('Training: {}'.format(strat))
+#         model = agent.get_model(strat, verbose=0)
 
-        model.learn(total_timesteps=1000000,
-                    eval_env=env_trade,
-                    log_interval=1,
-                    tb_log_name='env_cashpenalty_{}'.format(strat))
+#         model.learn(total_timesteps=1000000,
+#                     eval_env=env_trade,
+#                     log_interval=1,
+#                     tb_log_name='env_cashpenalty_{}'.format(strat))
 
-        model.save("{}.model".format(strat))
+#         model.save("{}.model".format(strat))
+        
+    model = agent.get_model('ppo', verbose=0)
+
+    model.learn(total_timesteps=1000000,
+                eval_env=env_trade,
+                log_interval=1,
+                tb_log_name='env_cashpenalty_PPO')
+
+    model.save("{}.model".format(strat))
 
     # trade.head()
     #

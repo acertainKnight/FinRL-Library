@@ -47,10 +47,10 @@ TECHNICAL_INDICATORS_LIST = ["macd","boll_ub","boll_lb","rsi_30", "cci_30", "dx_
 ## Model Parameters
 A2C_PARAMS = {"n_steps": 5, "ent_coef": 0.01, "learning_rate": 0.0007}
 PPO_PARAMS = {
-    "n_steps": 2048,
-    "ent_coef": 0.01,
+    "n_steps": 256,
+    "ent_coef": 0.0,
     "learning_rate": 0.00025,
-    "batch_size": 64,
+    "batch_size": 128,
 }
 DDPG_PARAMS = {"batch_size": 128, "buffer_size": 50000, "learning_rate": 0.001}
 TD3_PARAMS = {"batch_size": 100, "buffer_size": 1000000, "learning_rate": 0.001}
