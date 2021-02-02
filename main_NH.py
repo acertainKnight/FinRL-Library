@@ -49,8 +49,10 @@ def main():
     train = data_split(processed, config.START_DATE, config.START_TRADE_DATE)
     trade = data_split(processed, config.START_TRADE_DATE, config.END_DATE)
 
-    information_cols = ['daily_variance', 'change', 'log_volume', 'close', 'day',
-                        'macd', 'rsi_30', 'cci_30', 'dx_30']
+    information_cols = list(processed)
+    print(information_cols)
+    information_cols.remove('date')
+    information_cols.remove('tic')
 
     e_train_gym = StockTradingEnvCashpenalty(df=train, initial_amount=1e5, hmax=50,
                                              cache_indicator_data=True,
@@ -66,7 +68,7 @@ def main():
 
 
 
-    n_cores = multiprocessing.cpu_count()
+    n_cores = multiprocessing.cpu_count() - 2
     # n_cores = 24
     print(f"using {n_cores} cores")
 
@@ -102,14 +104,14 @@ def main():
 
 #         model.save("{}.model".format(strat))
         
-    model = agent.get_model('ppo', verbose=0)
+    model = agent.get_model('ppo', verbose=1)
 
     model.learn(total_timesteps=1000000,
                 eval_env=env_trade,
                 log_interval=1,
                 tb_log_name='env_cashpenalty_PPO')
 
-    model.save("{}.model".format(strat))
+    # model.save("{}.model".format(strat))
 
     # trade.head()
     #
