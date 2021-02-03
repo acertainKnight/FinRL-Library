@@ -41,7 +41,7 @@ def main():
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
         use_turbulence=False,
-        user_defined_feature=True)
+        user_defined_feature=False)
 
     processed = fe.preprocess_data(df)
 #     processed = df
@@ -56,17 +56,17 @@ def main():
 #     information_cols = ['daily_variance', 'change', 'log_volume', 'close','day', 
 #                     'macd', 'rsi_30', 'cci_30', 'dx_30']
 
-    e_train_gym = StockTradingEnvCashpenalty(df = train,initial_amount = 10000,hmax = 100, 
+    e_train_gym = StockTradingEnvCashpenalty(df = train,initial_amount = 5000,hmax = 10, 
                                     cache_indicator_data=True,
-                                    cash_penalty_proportion=0.2, 
+                                    cash_penalty_proportion=0.1, 
                                     daily_information_cols = information_cols, 
                                     print_verbosity = 500, random_start = True)
 
 
 
 
-    e_trade_gym = StockTradingEnvCashpenalty(df = trade,initial_amount = 10000,hmax = 100, 
-                                    cash_penalty_proportion=0.2,
+    e_trade_gym = StockTradingEnvCashpenalty(df = trade,initial_amount = 5000,hmax = 10, 
+                                    cash_penalty_proportion=0.1,
                                     cache_indicator_data=True,
                                     daily_information_cols = information_cols, 
                                     print_verbosity = 500, random_start = False)
@@ -88,9 +88,9 @@ def main():
     agent = DRLAgent(env=env_train)
 
     # from torch.nn import Softsign, ReLU
-    ppo_params ={'n_steps': 256,
+    ppo_params ={'n_steps': 1024,
                  'ent_coef': 0.0,
-                 'learning_rate': 0.0005,
+                 'learning_rate': 0.000005,
                  'batch_size': 1024,
                 'gamma': 0.99}
     
@@ -102,9 +102,9 @@ def main():
 
     model = agent.get_model("ppo",
                             model_kwargs = ppo_params,
-                            policy_kwargs = policy_kwargs, verbose = 1)
+                            policy_kwargs = policy_kwargs, verbose = 0)
     
-    model.learn(total_timesteps = 1000000,
+    model.learn(total_timesteps = 500000,
                 eval_env = env_trade,
                 eval_freq = 500,
                 log_interval = 1,

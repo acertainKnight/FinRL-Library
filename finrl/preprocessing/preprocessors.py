@@ -75,7 +75,6 @@ class FeatureEngineer:
         df = data.copy()
         stock = Sdf.retype(df.copy())
         unique_ticker = stock.tic.unique()
-
         for indicator in self.tech_indicator_list:
             indicator_df = pd.DataFrame()
             for i in range(len(unique_ticker)):
@@ -88,7 +87,6 @@ class FeatureEngineer:
                 except Exception as e:
                     print(e)
             df[indicator] = indicator_df
-        
         return df
 
     def add_user_defined_feature(self, data):
@@ -115,11 +113,36 @@ class FeatureEngineer:
         df['log_volume'] = np.log(df.volume * df.close)
         df['change'] = np.divide(np.subtract(df.close.values, df.open.values), df.close.values)
         df['daily_variance'] = np.divide(np.subtract(df.high.values, df.low.values), df.close.values)
+        df['close_boll_ub'] = np.subtract(df.boll_ub.values, df.close.values)
+        df['close_boll_lb'] = np.subtract(df.boll_lb.values, df.close.values)
+        
+        daily_changelag_df = pd.DataFrame()
+        for i in range(len(unique_ticker)):
+            try:
+                temp_indicator = df[df.tic == unique_ticker[i]].change.shift(1)
+                temp_indicator = pd.DataFrame(temp_indicator)
+                daily_changelag_df = daily_changelag_df.append(
+                    temp_indicator, ignore_index=True
+                )
+            except Exception as e:
+                print(e)
         
         fred = Fred(api_key='a2ca2601550a3ac2a1af260112595a8d')
-        for series in ['EFFR', 'UNRATE', 'DEXUSEU', 'TEDRATE', 'DTWEXBGS',
-                       'VIXCLS', 'DEXCHUS', 'USRECD', 'DTWEXEMEGS', 'VXEEMCLS',
-                       'A191RL1Q225SBEA', 'GFDEGDQ188S', 'DPCERL1Q225SBEA']:
+        temp = df['date'].to_frame()
+        for series in ['EFFR',
+#                        'UNRATE',
+#                        'DEXUSEU',
+#                        'TEDRATE',
+#                        'DTWEXBGS',
+#                        'VIXCLS',
+#                        'DEXCHUS',
+#                        'USRECD',
+#                        'DTWEXEMEGS',
+#                        'VXEEMCLS',
+#                        'A191RL1Q225SBEA',
+#                        'GFDEGDQ188S',
+#                        'DPCERL1Q225SBEA'
+                      ]:
 
             data = fred.get_series(series)
             data = data.to_frame()
@@ -129,6 +152,8 @@ class FeatureEngineer:
                 series
             ]
             data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+            temp_2 = pd.merge(temp, data, how='left', left_on='date', right_on='date')
+            temp.fillna(method="ffill")
             df = pd.merge(df, data, how='left', left_on='date', right_on='date')
 
         return df

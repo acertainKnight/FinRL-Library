@@ -34,14 +34,15 @@ RESULTS_DIR = f"results"
 START_DATE = "2009-01-01"
 END_DATE = "2021-01-01"
 
-START_TRADE_DATE = "2016-01-01"
+START_TRADE_DATE = "2018-01-01"
 
 ## dataset default columns
 DEFAULT_DATA_COLUMNS = ["date", "tic", "close"]
 
 ## stockstats technical indicator column names
 ## check https://pypi.org/project/stockstats/ for different names
-TECHNICAL_INDICATORS_LIST = ["macd","boll_ub","boll_lb","rsi_30", "cci_30", "dx_30","close_30_sma","close_60_sma"]
+TECHNICAL_INDICATORS_LIST = ["macd","boll_ub","boll_lb","rsi_30", "cci_30", "dx_30","close_30_sma","close_60_sma",
+                             "volume_delta", "rsi_20", "close_10_sma", "rsi_7", "cci_7", "dma"]
 
 
 ## Model Parameters
