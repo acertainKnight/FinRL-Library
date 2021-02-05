@@ -209,9 +209,10 @@ class DRLEnsembleAgent:
         self.print_verbosity = print_verbosity
 
 
-    def DRL_validation(self, model, test_data, test_env, test_obs):
+    def DRL_validation(self, model, test_data, test_env, test_obs, name):
         ###validation process###
         for i in range(len(test_data.index.unique())):
+            # print(name, i)
             action, _states = model.predict(test_obs)
             test_obs, rewards, dones, info = test_env.step(action)
 
@@ -474,7 +475,7 @@ class DRLEnsembleAgent:
         print("======{} Training========".format(model))
         model_a2c = self.get_model(model, self.train_env, policy="MlpPolicy", model_kwargs=model_kwargs)
         model_a2c = self.train_model(model_a2c, model, tb_log_name="{}_{}".format(model, i), iter_num=i,
-                                     total_timesteps=timesteps_dict['a2c'])  # 100_000
+                                     total_timesteps=timesteps_dict[model])  # 100_000
 
         print("======{} Validation from: ".format(model), validation_start_date, "to ", validation_end_date)
         val_env_a2c = DummyVecEnv([lambda: StockTradingEnv(validation,
@@ -493,8 +494,8 @@ class DRLEnsembleAgent:
                                                            mode='validation',
                                                            print_verbosity=self.print_verbosity)])
         val_obs_a2c = val_env_a2c.reset()
-        self.DRL_validation(model=model_a2c, test_data=validation, test_env=val_env_a2c, test_obs=val_obs_a2c)
-        sharpe_a2c = self.get_validation_sharpe(i, model_name="A2C")
+        self.DRL_validation(model=model_a2c, test_data=validation, test_env=val_env_a2c, test_obs=val_obs_a2c, name=model)
+        sharpe_a2c = self.get_validation_sharpe(i, model_name=model)
         print("{} Sharpe Ratio: {}".format(model, sharpe_a2c))
         return [model, sharpe_a2c]
 

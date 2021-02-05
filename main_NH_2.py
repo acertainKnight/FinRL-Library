@@ -42,7 +42,7 @@ def main():
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
         use_turbulence=True,
-        user_defined_feature=True)
+        user_defined_feature=False)
 
     processed = fe.preprocess_data(df)
     information_cols = list(processed)
@@ -65,7 +65,7 @@ def main():
         "tech_indicator_list": information_cols,
         "action_space": stock_dimension,
         "reward_scaling": 1e-4,
-        "print_verbosity": 5
+        "print_verbosity": 1000
 
     }
 

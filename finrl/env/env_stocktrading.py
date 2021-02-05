@@ -247,8 +247,10 @@ class StockTradingEnv(gym.Env):
 
             self.day += 1
             self.data = self.df.loc[self.day,:]    
-            if self.turbulence_threshold is not None:     
-                self.turbulence = self.data['turbulence'].values[0]
+            if self.turbulence_threshold is not None:
+                # print(self.model_name, self.data['turbulence'])
+                # print(self.model_name, self.data)
+                self.turbulence = self.data['turbulence']#.values[0]
             self.state =  self._update_state()
                            
             end_total_asset = self.state[0]+ \
