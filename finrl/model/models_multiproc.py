@@ -31,6 +31,7 @@ from stable_baselines3.common.noise import (
 )
 
 from stable_baselines3 import SAC
+from multiprocessing.pool import Pool
 
 
 MODELS = {"a2c": A2C, "ddpg": DDPG, "td3": TD3, "sac": SAC, "ppo": PPO}
@@ -338,102 +339,63 @@ class DRLEnsembleAgent:
                   self.unique_trade_date[i - self.rebalance_window - self.validation_window])
             # print("training: ",len(data_split(df, start=20090000, end=test.datadate.unique()[i-rebalance_window]) ))
             # print("==============Model Training===========")
-            print("======A2C Training========")
-            model_a2c = self.get_model("a2c",self.train_env,policy="MlpPolicy",model_kwargs=A2C_model_kwargs)
-            model_a2c = self.train_model(model_a2c, "a2c", tb_log_name="a2c_{}".format(i), iter_num = i, total_timesteps=timesteps_dict['a2c']) #100_000
 
-            print("======A2C Validation from: ", validation_start_date, "to ",validation_end_date)
-            val_env_a2c = DummyVecEnv([lambda: StockTradingEnv(validation,
-                                                                self.stock_dim,
-                                                                self.hmax,
-                                                                self.initial_amount,
-                                                                self.buy_cost_pct,
-                                                                self.sell_cost_pct,
-                                                                self.reward_scaling,
-                                                                self.state_space,
-                                                                self.action_space,
-                                                                self.tech_indicator_list,
-                                                                turbulence_threshold=turbulence_threshold,
-                                                                iteration=i,
-                                                                model_name='A2C',
-                                                                mode='validation',
-                                                                print_verbosity=self.print_verbosity)])
-            val_obs_a2c = val_env_a2c.reset()
-            self.DRL_validation(model=model_a2c,test_data=validation,test_env=val_env_a2c,test_obs=val_obs_a2c)
-            sharpe_a2c = self.get_validation_sharpe(i,model_name="A2C")
-            print("A2C Sharpe Ratio: ", sharpe_a2c)
+            a2c_arguments = {
+                'model': 'a2c',
+                'model_kwargs': A2C_model_kwargs,
+                'turbulence_threshold': turbulence_threshold,
+                'i': i,
+                'validation': validation,
+                'timesteps_dict': timesteps_dict,
+                'validation_start_date': validation_start_date,
+                'validation_end_date': validation_end_date
+            }
 
-            print("======PPO Training========")
-            model_ppo = self.get_model("ppo",self.train_env,policy="MlpPolicy",model_kwargs=PPO_model_kwargs)
-            model_ppo = self.train_model(model_ppo, "ppo", tb_log_name="ppo_{}".format(i), iter_num = i, total_timesteps=timesteps_dict['ppo']) #100_000
-            print("======PPO Validation from: ", validation_start_date, "to ",validation_end_date)
-            val_env_ppo = DummyVecEnv([lambda: StockTradingEnv(validation,
-                                                                self.stock_dim,
-                                                                self.hmax,
-                                                                self.initial_amount,
-                                                                self.buy_cost_pct,
-                                                                self.sell_cost_pct,
-                                                                self.reward_scaling,
-                                                                self.state_space,
-                                                                self.action_space,
-                                                                self.tech_indicator_list,
-                                                                turbulence_threshold=turbulence_threshold,
-                                                                iteration=i,
-                                                                model_name='PPO',
-                                                                mode='validation',
-                                                                print_verbosity=self.print_verbosity)])
-            val_obs_ppo = val_env_ppo.reset()
-            self.DRL_validation(model=model_ppo,test_data=validation,test_env=val_env_ppo,test_obs=val_obs_ppo)
-            sharpe_ppo = self.get_validation_sharpe(i,model_name="PPO")
-            print("PPO Sharpe Ratio: ", sharpe_ppo)
+            ppo_arguments = {
+                'model': 'ppo',
+                'model_kwargs': PPO_model_kwargs,
+                'turbulence_threshold': turbulence_threshold,
+                'i': i,
+                'validation': validation,
+                'timesteps_dict': timesteps_dict,
+                'validation_start_date': validation_start_date,
+                'validation_end_date': validation_end_date
+            }
 
-            print("======DDPG Training========")
-            model_ddpg = self.get_model("ddpg",self.train_env,policy="MlpPolicy",model_kwargs=DDPG_model_kwargs)
-            model_ddpg = self.train_model(model_ddpg, "ddpg", tb_log_name="ddpg_{}".format(i), iter_num = i, total_timesteps=timesteps_dict['ddpg'])  #50_000
-            print("======DDPG Validation from: ", validation_start_date, "to ",validation_end_date)
-            val_env_ddpg = DummyVecEnv([lambda: StockTradingEnv(validation,
-                                                                self.stock_dim,
-                                                                self.hmax,
-                                                                self.initial_amount,
-                                                                self.buy_cost_pct,
-                                                                self.sell_cost_pct,
-                                                                self.reward_scaling,
-                                                                self.state_space,
-                                                                self.action_space,
-                                                                self.tech_indicator_list,
-                                                                turbulence_threshold=turbulence_threshold,
-                                                                iteration=i,
-                                                                model_name='DDPG',
-                                                                mode='validation',
-                                                                print_verbosity=self.print_verbosity)])
-            val_obs_ddpg = val_env_ddpg.reset()
-            self.DRL_validation(model=model_ddpg,test_data=validation,test_env=val_env_ddpg,test_obs=val_obs_ddpg)
-            sharpe_ddpg = self.get_validation_sharpe(i,model_name="DDPG")
+            ddpg_arguments = {
+                'model': 'ddpg',
+                'model_kwargs': DDPG_model_kwargs,
+                'turbulence_threshold': turbulence_threshold,
+                'i': i,
+                'validation': validation,
+                'timesteps_dict': timesteps_dict,
+                'validation_start_date': validation_start_date,
+                'validation_end_date': validation_end_date
+            }
 
-            print("======TD3 Training========")
-            model_td3 = self.get_model("td3",self.train_env,policy="MlpPolicy",model_kwargs=TD3_model_kwargs)
-            model_td3 = self.train_model(model_td3, "td3", tb_log_name="td3_{}".format(i), iter_num = i, total_timesteps=timesteps_dict['td3']) #100_000
+            td3_arguments = {
+                'model': 'td3',
+                'model_kwargs': TD3_model_kwargs,
+                'turbulence_threshold': turbulence_threshold,
+                'i': i,
+                'validation': validation,
+                'timesteps_dict': timesteps_dict,
+                'validation_start_date': validation_start_date,
+                'validation_end_date': validation_end_date
+            }
 
-            print("======TD3 Validation from: ", validation_start_date, "to ",validation_end_date)
-            val_env_td3 = DummyVecEnv([lambda: StockTradingEnv(validation,
-                                                                self.stock_dim,
-                                                                self.hmax,
-                                                                self.initial_amount,
-                                                                self.buy_cost_pct,
-                                                                self.sell_cost_pct,
-                                                                self.reward_scaling,
-                                                                self.state_space,
-                                                                self.action_space,
-                                                                self.tech_indicator_list,
-                                                                turbulence_threshold=turbulence_threshold,
-                                                                iteration=i,
-                                                                model_name='TD3',
-                                                                mode='validation',
-                                                                print_verbosity=self.print_verbosity)])
-            val_obs_td3 = val_env_td3.reset()
-            self.DRL_validation(model=model_td3,test_data=validation,test_env=val_env_td3,test_obs=val_obs_td3)
-            sharpe_td3 = self.get_validation_sharpe(i,model_name="TD3")
-            print("TD3 Sharpe Ratio: ", sharpe_td3)
+            p = Pool(processes=4)
+
+            argument_list = [a2c_arguments,ppo_arguments,ddpg_arguments,td3_arguments]
+
+            result = p.map(self.train_val, argument_list)
+            p.close()
+            p.join()
+
+            sharpe_a2c = result[0]
+            sharpe_ppo = result[1]
+            sharpe_ddpg = result[2]
+            sharpe_td3 = result[3]
 
             ppo_sharpe_list.append(sharpe_ppo)
             a2c_sharpe_list.append(sharpe_a2c)
@@ -497,6 +459,44 @@ class DRLEnsembleAgent:
         df_summary.columns = ['Iter','Val Start','Val End','Model Used','A2C Sharpe','PPO Sharpe','DDPG Sharpe']
 
         return df_summary
+
+    def train_val(self, arguments):
+        model = arguments['model']
+        model_kwargs = arguments['model_kwargs']
+        turbulence_threshold = arguments['turbulence_threshold']
+        i = arguments['i']
+        validation = arguments['validation']
+        timesteps_dict = arguments['timesteps_dict']
+        validation_start_date = arguments['validation_start_date']
+        validation_end_date = arguments['validation_end_date']
+
+        ############## Training and Validation starts ##############
+        print("======{} Training========".format(model))
+        model_a2c = self.get_model(model, self.train_env, policy="MlpPolicy", model_kwargs=model_kwargs)
+        model_a2c = self.train_model(model_a2c, model, tb_log_name="{}_{}".format(model, i), iter_num=i,
+                                     total_timesteps=timesteps_dict['a2c'])  # 100_000
+
+        print("======{} Validation from: ".format(model), validation_start_date, "to ", validation_end_date)
+        val_env_a2c = DummyVecEnv([lambda: StockTradingEnv(validation,
+                                                           self.stock_dim,
+                                                           self.hmax,
+                                                           self.initial_amount,
+                                                           self.buy_cost_pct,
+                                                           self.sell_cost_pct,
+                                                           self.reward_scaling,
+                                                           self.state_space,
+                                                           self.action_space,
+                                                           self.tech_indicator_list,
+                                                           turbulence_threshold=turbulence_threshold,
+                                                           iteration=i,
+                                                           model_name=model,
+                                                           mode='validation',
+                                                           print_verbosity=self.print_verbosity)])
+        val_obs_a2c = val_env_a2c.reset()
+        self.DRL_validation(model=model_a2c, test_data=validation, test_env=val_env_a2c, test_obs=val_obs_a2c)
+        sharpe_a2c = self.get_validation_sharpe(i, model_name="A2C")
+        print("{} Sharpe Ratio: {}".format(model, sharpe_a2c))
+        return [model, sharpe_a2c]
 
 
 

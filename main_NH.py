@@ -14,7 +14,7 @@ from finrl.marketdata.yahoodownloader import YahooDownloader
 from finrl.preprocessing.preprocessors import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
-from finrl.model.models import DRLAgent, DRLEnsembleAgent
+from finrl.model.models_multiproc import DRLAgent, DRLEnsembleAgent
 from finrl.trade.backtest import backtest_plot, backtest_stats
 import os
 import multiprocessing
