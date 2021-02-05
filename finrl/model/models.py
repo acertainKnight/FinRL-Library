@@ -74,15 +74,19 @@ class DRLAgent:
         account_memory = []
         actions_memory = []
         test_env.reset()
+        print(range(len(environment.df.index.unique())))
         for i in range(len(environment.df.index.unique())):
+            print(i)
             action, _states = model.predict(test_obs)
+            print(action)
             account_memory = test_env.env_method(method_name="save_asset_memory")
             actions_memory = test_env.env_method(method_name="save_action_memory")
             test_obs, rewards, dones, info = test_env.step(action)
-            if dones[0]:
-                print("hit end!")
-
-                break
+            # if dones[0]:
+            #     print("hit end!")
+            #
+            #     break
+        print(account_memory)
         return account_memory[0], actions_memory[0]
 
     def __init__(self, env):

@@ -186,19 +186,19 @@ class StockTradingEnvCashpenalty(gym.Env):
             f"{terminal_reward*100:0.5f}%",
             f"{cash_pct*100:0.2f}%",
         ]
-        log_df = pd.DataFrame({'Period': [self.counter_2],
-                               'Episode length': [self.date_index - self.starting_point],
-                               'Total assets': [int(self.account_information['total_assets'][-1])],
-                               'Reward': [terminal_reward],
-                               'Cash pct': [cash_pct]})
-        self.counter += 1
-        if reason != 'update':
-            self.history = self.history.append(log_df)
-            self.episode_history.append(rec)
-            if self.counter % 10 == 0:
-                print(self.history.groupby(['Period']).mean())
-                self.counter_2 += 1
-#         print(self.template.format(*rec))
+        # log_df = pd.DataFrame({'Period': [self.counter_2],
+        #                        'Episode length': [self.date_index - self.starting_point],
+        #                        'Total assets': [int(self.account_information['total_assets'][-1])],
+        #                        'Reward': [terminal_reward],
+        #                        'Cash pct': [cash_pct]})
+        # self.counter += 1
+        # if reason != 'update':
+        #     self.history = self.history.append(log_df)
+        #     self.episode_history.append(rec)
+        #     if self.counter % 10 == 0:
+        #         print(self.history.groupby(['Period']).mean())
+        #         self.counter_2 += 1
+        # print(self.template.format(*rec))
 
     def log_header(self):
         self.template = "{0:4}|{1:4}|{2:15}|{3:10}|{4:10}|{5:10}"  # column widths: 8, 10, 15, 7, 10
@@ -319,11 +319,13 @@ class StockTradingEnvCashpenalty(gym.Env):
         return e, obs
 
     def save_asset_memory(self):
+        print(self.current_step)
+        print(self.account_information)
         if self.current_step == 0:
             return None
         else:
             self.account_information["date"] = self.dates[
-                -len(self.account_information["cash"]) :
+                -len(self.account_information["cash"]):
             ]
             return pd.DataFrame(self.account_information)
 

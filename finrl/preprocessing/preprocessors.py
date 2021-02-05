@@ -62,6 +62,17 @@ class FeatureEngineer:
         df.replace([np.inf, -np.inf], np.nan)
         df = df.fillna(method="bfill").fillna(method="ffill")
         df.drop_duplicates(inplace=True)
+        # list_ticker = df["tic"].unique().tolist()
+        # list_date = list(pd.date_range(df['date'].min(), df['date'].max()).astype(str))
+        # combination = list(df.product(list_date, list_ticker))
+        #
+        # processed_full = pd.DataFrame(combination, columns=["date", "tic"]).merge(df, on=["date", "tic"],
+        #                                                                           how="left")
+        # processed_full = processed_full[processed_full['date'].isin(df['date'])]
+        # processed_full = processed_full.sort_values(['date', 'tic'])
+        #
+        # processed_full = processed_full.fillna(0)
+
         print("Shape of DataFrame (w/indicators): ", df.shape)
         return df
 
@@ -107,7 +118,7 @@ class FeatureEngineer:
                 )
             except Exception as e:
                 print(e)
-                
+
         df["daily_return"] = daily_return_df.values
 
         df['log_volume'] = np.log(df.volume * df.close)
@@ -115,7 +126,7 @@ class FeatureEngineer:
         df['daily_variance'] = np.divide(np.subtract(df.high.values, df.low.values), df.close.values)
         df['close_boll_ub'] = np.subtract(df.boll_ub.values, df.close.values)
         df['close_boll_lb'] = np.subtract(df.boll_lb.values, df.close.values)
-        
+
         daily_changelag_df = pd.DataFrame()
         for i in range(len(unique_ticker)):
             try:
@@ -126,7 +137,7 @@ class FeatureEngineer:
                 )
             except Exception as e:
                 print(e)
-        
+
         fred = Fred(api_key='a2ca2601550a3ac2a1af260112595a8d')
         temp = df['date'].to_frame()
         for series in ['EFFR',
