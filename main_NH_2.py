@@ -36,7 +36,7 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.SINGLE_TICKER).fetch_data()
+                         ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
@@ -65,7 +65,7 @@ def main():
         "tech_indicator_list": information_cols,
         "action_space": stock_dimension,
         "reward_scaling": 1e-4,
-        "print_verbosity": 1000
+        "print_verbosity": 5
 
     }
 
@@ -109,10 +109,10 @@ def main():
         "learning_rate": 0.001
     }
 
-    timesteps_dict = {'a2c': 100000,
-                      'ppo': 100000,
-                      'ddpg': 50000,
-                      'td3': 50000
+    timesteps_dict = {'a2c': 10,
+                      'ppo': 10,
+                      'ddpg': 5,
+                      'td3': 5
                       }
 
     df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,

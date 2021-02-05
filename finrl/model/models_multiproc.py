@@ -318,6 +318,7 @@ class DRLEnsembleAgent:
 
             ############## Environment Setup starts ##############
             ## training env
+            print('State space: ', self.state_space)
             train = data_split(self.df, start=self.train_period[0], end=self.unique_trade_date[i - self.rebalance_window - self.validation_window])
             self.train_env = DummyVecEnv([lambda: StockTradingEnv(train,
                                                                 self.stock_dim,
@@ -341,6 +342,17 @@ class DRLEnsembleAgent:
             # print("training: ",len(data_split(df, start=20090000, end=test.datadate.unique()[i-rebalance_window]) ))
             # print("==============Model Training===========")
 
+            a2c_state_space = self.state_space
+            ppo_state_space = self.state_space
+            ddpg_state_space = self.state_space
+            td3_state_space = self.state_space
+            a2c_train_env = self.train_env
+            ppo_train_env = self.train_env
+            ddpg_train_env = self.train_env
+            td3_train_env = self.train_env
+
+
+
             a2c_arguments = {
                 'model': 'a2c',
                 'model_kwargs': A2C_model_kwargs,
@@ -349,7 +361,9 @@ class DRLEnsembleAgent:
                 'validation': validation,
                 'timesteps_dict': timesteps_dict,
                 'validation_start_date': validation_start_date,
-                'validation_end_date': validation_end_date
+                'validation_end_date': validation_end_date,
+                'state_space': a2c_state_space,
+                'train_env': a2c_train_env
             }
 
             ppo_arguments = {
@@ -360,7 +374,9 @@ class DRLEnsembleAgent:
                 'validation': validation,
                 'timesteps_dict': timesteps_dict,
                 'validation_start_date': validation_start_date,
-                'validation_end_date': validation_end_date
+                'validation_end_date': validation_end_date,
+                'state_space': ppo_state_space,
+                'train_env': ppo_train_env
             }
 
             ddpg_arguments = {
@@ -371,7 +387,9 @@ class DRLEnsembleAgent:
                 'validation': validation,
                 'timesteps_dict': timesteps_dict,
                 'validation_start_date': validation_start_date,
-                'validation_end_date': validation_end_date
+                'validation_end_date': validation_end_date,
+                'state_space': ddpg_state_space,
+                'train_env': ddpg_train_env
             }
 
             td3_arguments = {
@@ -382,7 +400,9 @@ class DRLEnsembleAgent:
                 'validation': validation,
                 'timesteps_dict': timesteps_dict,
                 'validation_start_date': validation_start_date,
-                'validation_end_date': validation_end_date
+                'validation_end_date': validation_end_date,
+                'state_space': td3_state_space,
+                'train_env': td3_train_env
             }
 
             p = Pool(processes=4)
@@ -470,10 +490,14 @@ class DRLEnsembleAgent:
         timesteps_dict = arguments['timesteps_dict']
         validation_start_date = arguments['validation_start_date']
         validation_end_date = arguments['validation_end_date']
+        state_space = arguments['state_space']
+        train_env = arguments['train_env']
+
+        print(model, state_space)
 
         ############## Training and Validation starts ##############
         print("======{} Training========".format(model))
-        model_a2c = self.get_model(model, self.train_env, policy="MlpPolicy", model_kwargs=model_kwargs)
+        model_a2c = self.get_model(model, train_env, policy="MlpPolicy", model_kwargs=model_kwargs)
         model_a2c = self.train_model(model_a2c, model, tb_log_name="{}_{}".format(model, i), iter_num=i,
                                      total_timesteps=timesteps_dict[model])  # 100_000
 
@@ -485,7 +509,7 @@ class DRLEnsembleAgent:
                                                            self.buy_cost_pct,
                                                            self.sell_cost_pct,
                                                            self.reward_scaling,
-                                                           self.state_space,
+                                                           state_space,
                                                            self.action_space,
                                                            self.tech_indicator_list,
                                                            turbulence_threshold=turbulence_threshold,
