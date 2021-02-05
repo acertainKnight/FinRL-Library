@@ -42,7 +42,7 @@ def main():
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
         use_turbulence=True,
-        user_defined_feature=False)
+        user_defined_feature=True)
 
     processed = fe.preprocess_data(df)
     information_cols = list(processed)

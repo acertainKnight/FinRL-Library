@@ -127,8 +127,8 @@ class FeatureEngineer:
         df['close_boll_ub'] = np.subtract(df.boll_ub.values, df.close.values)
         df['close_boll_lb'] = np.subtract(df.boll_lb.values, df.close.values)
         df['close_30_sma_close_60_sma'] = np.subtract(df.close_30_sma.values, df.close_60_sma.values)
-        df['macd_20_macd_50'] = np.subtract(df.macd_20.values, df.macd_50.values)
-        df['macd_50_macd_200'] = np.subtract(df.macd_50.values, df.macd_200.values)
+        df['close_20_sma_close_50_sma'] = np.subtract(df.close_20_sma.values, df.close_50_sma.values)
+        df['close_50_sma_close_200_sma'] = np.subtract(df.close_50_sma.values, df.close_200_sma.values)
 
         daily_changelag_df = pd.DataFrame()
         for i in range(len(unique_ticker)):
