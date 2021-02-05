@@ -57,11 +57,14 @@ class YahooDownloader:
                 # date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
                 #                                            end=self.end_date,
                 #                                            freq='D').to_list()})
-                # temp_date_df = pd.merge(date_df, temp_df, how='left', left_on='date_y', right_index=True)
-                # temp_date_df = temp_date_df.fillna(-9999)
+                date_df = pd.DataFrame({'date_y': date_col.to_list()})
+                temp_date_df = pd.merge(date_df, temp_df, how='left', left_on='date_y', right_index=True)
+                temp_date_df = temp_date_df.fillna(0)
+                temp_date_df.drop('date_y', axis=1)
                 print('Tic not available over period; {}'.format(tic))
-                continue
+                # continue
             else:
+                date_col = temp_df.index
                 temp_date_df = temp_df.copy()
             temp_date_df["tic"] = tic
             temp_date_df.drop_duplicates(inplace=True)
