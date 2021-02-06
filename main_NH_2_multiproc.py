@@ -14,7 +14,7 @@ from finrl.marketdata.yahoodownloader import YahooDownloader
 from finrl.preprocessing.preprocessors import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
-from finrl.model.models import DRLAgent, DRLEnsembleAgent
+from finrl.model.models_multiproc import DRLAgent, DRLEnsembleAgent
 from finrl.trade.backtest import backtest_plot, backtest_stats
 import os
 import multiprocessing
@@ -42,7 +42,7 @@ def main():
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
         use_turbulence=True,
-        user_defined_feature=True)
+        user_defined_feature=False)
 
     processed = fe.preprocess_data(df)
     information_cols = list(processed)
@@ -109,10 +109,10 @@ def main():
         "learning_rate": 0.001
     }
 
-    timesteps_dict = {'a2c': 100000,
-                      'ppo': 100000,
-                      'ddpg': 50000,
-                      'td3': 50000
+    timesteps_dict = {'a2c': 10000,
+                      'ppo': 10000,
+                      'ddpg': 5000,
+                      'td3': 5000
                       }
 
     df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,
