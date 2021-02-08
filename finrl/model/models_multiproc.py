@@ -407,13 +407,12 @@ class DRLEnsembleAgent:
                     'train_env': td3_train_env
                 }
 
-                p = pool(processes=4)
 
                 argument_list = [a2c_arguments,ppo_arguments,ddpg_arguments,td3_arguments]
 
-                result = p.map(self.train_val, argument_list)
-                p.close()
-                p.join()
+                result = pool.map(self.train_val, argument_list)
+                pool.close()
+                pool.join()
 
                 sharpe_a2c = result[0]
                 sharpe_ppo = result[1]
