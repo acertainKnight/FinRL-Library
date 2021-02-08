@@ -50,8 +50,8 @@ class YahooDownloader:
         i = 0
         d_list = self.date_list()
         for tic in self.ticker_list:
-            if i == 50:
-                break
+            # if i == 50:
+            #     break
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
             if len(temp_df) < 1:
                 continue
