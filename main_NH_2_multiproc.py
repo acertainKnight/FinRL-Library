@@ -36,7 +36,7 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
+                         ticker_list=config.PENNY_STOCKS).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
@@ -68,7 +68,7 @@ def main():
 
     }
 
-    rebalance_window = 63  # rebalance_window is the number of days to retrain the model
+    rebalance_window = 21  # rebalance_window is the number of days to retrain the model
     validation_window = 63  # validation_window is the number of days to do validation and trading (e.g. if validation_window=63, then both validation and trading period will be 63 days)
     train_start = config.START_DATE
     train_end = config.START_TRADE_DATE
@@ -108,10 +108,10 @@ def main():
         "learning_rate": 0.001
     }
 
-    timesteps_dict = {'a2c': 10000,
-                      'ppo': 10000,
-                      'ddpg': 5000,
-                      'td3': 5000
+    timesteps_dict = {'a2c': 100000,
+                      'ppo': 100000,
+                      'ddpg': 50000,
+                      'td3': 50000
                       }
 
     df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,
