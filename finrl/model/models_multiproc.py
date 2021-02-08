@@ -407,7 +407,7 @@ class DRLEnsembleAgent:
                     'train_env': td3_train_env
                 }
 
-                p = Pool(processes=4)
+                p = pool(processes=4)
 
                 argument_list = [a2c_arguments,ppo_arguments,ddpg_arguments,td3_arguments]
 
