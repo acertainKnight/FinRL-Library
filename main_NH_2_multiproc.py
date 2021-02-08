@@ -53,7 +53,6 @@ def main():
     state_space = 1 + 2 * stock_dimension + len(information_cols) * stock_dimension
     print("Stock Dimension: {}, State Space: {}".format(stock_dimension, state_space))
 
-
     env_kwargs = {
         "hmax": 100,
         "initial_amount": 5000,
@@ -138,7 +137,8 @@ def main():
             df_account_value = df_account_value.append(temp, ignore_index=True)
         except:
             break
-    sharpe = (252 ** 0.5) * df_account_value.account_value.pct_change(1).mean() / df_account_value.account_value.pct_change(1).std()
+    sharpe = (252 ** 0.5) * df_account_value.account_value.pct_change(
+        1).mean() / df_account_value.account_value.pct_change(1).std()
     print('Sharpe Ratio: ', sharpe)
     df_account_value = df_account_value.join(df_trade_date[validation_window:].reset_index(drop=True))
 

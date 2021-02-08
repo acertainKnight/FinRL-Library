@@ -117,7 +117,7 @@ class DRLAgent:
         model = MODELS[model_name](
             policy=policy,
             env=self.env,
-            tensorboard_log=None #f"{config.TENSORBOARD_LOG_DIR}/{model_name}",
+            tensorboard_log=None, #f"{config.TENSORBOARD_LOG_DIR}/{model_name}",
             verbose=verbose,
             policy_kwargs=policy_kwargs,
             **model_kwargs,
@@ -155,7 +155,7 @@ class DRLEnsembleAgent:
         model = MODELS[model_name](
             policy=policy,
             env=env,
-            tensorboard_log=None #f"{config.TENSORBOARD_LOG_DIR}/{model_name}",
+            tensorboard_log=None, #f"{config.TENSORBOARD_LOG_DIR}/{model_name}",
             verbose=verbose,
             policy_kwargs=policy_kwargs,
             **temp_model_kwargs,
