@@ -1499,7 +1499,6 @@ PENNY_STOCKS = [
     'EQNR',
     'KDMN',
     'MUR',
-    '',
     'BTU',
     'STNG',
     'CPG',
