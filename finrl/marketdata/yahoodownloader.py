@@ -53,7 +53,9 @@ class YahooDownloader:
             if i == 50:
                 break
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
-            if temp_df.index[0] not in d_list:
+            if len(temp_df) < 1:
+                continue
+            elif temp_df.index[0] not in d_list:
                 # date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
                 #                                            end=self.end_date,
                 #                                            freq='D').to_list()})
