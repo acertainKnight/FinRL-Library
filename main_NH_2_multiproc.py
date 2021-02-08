@@ -98,7 +98,7 @@ def main():
 
     DDPG_model_kwargs = {
         "action_noise": "ornstein_uhlenbeck",
-        "buffer_size": 50_000,
+        "buffer_size": 50000,
         "learning_rate": 0.000005,
         "batch_size": 128
     }
