@@ -51,7 +51,7 @@ def main():
 
     stock_dimension = len(processed.tic.unique())
     state_space = 1 + 2 * stock_dimension + len(information_cols) * stock_dimension
-    print(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
+    print("Stock Dimension: {}, State Space: {}".format(stock_dimension, state_space))
 
 
     env_kwargs = {
