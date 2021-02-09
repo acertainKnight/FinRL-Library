@@ -233,8 +233,8 @@ class FeatureEngineer:
         return turbulence_index
 
     def standardize_dates(self, data):
-        date_df = pd.DataFrame({'date_y': pd.bdate_range(start=config.start_date,
-                                                         end=config.end_date,
+        date_df = pd.DataFrame({'date_y': pd.bdate_range(start=config.START_DATE,
+                                                         end=config.END_DATE,
                                                          freq='B').to_list()})
         holidays = mcal.get_calendar('NYSE').holidays().to_list()
         date_df = date_df[~date_df['date_y'].isin(holidays)]
