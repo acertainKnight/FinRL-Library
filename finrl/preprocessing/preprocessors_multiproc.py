@@ -56,7 +56,7 @@ class FeatureEngineer:
             else:
                 _ = [df, [tempindex_list[i], tempindex_list[i+1]]]
             index_list.append(_)
-        # print(index_list)
+        print(index_list[1])
 
         if self.use_technical_indicator == True:
             with get_context("spawn").Pool() as pool:
