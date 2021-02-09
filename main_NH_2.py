@@ -36,7 +36,7 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.PENNY_STOCKS).fetch_data()
+                         ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
