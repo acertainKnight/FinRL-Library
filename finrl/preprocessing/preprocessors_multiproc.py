@@ -50,7 +50,8 @@ class FeatureEngineer:
         print(tempindex_list)
         index_list = []
         for i in range(len(tempindex_list)):
-            if i == len(tempindex_list):
+            print(i)
+            if i == list(range(len(tempindex_list)))[-1]:
                 _ = [tempindex_list[i], len(df.tic.unique())]
             else:
                 _ = [tempindex_list[i], tempindex_list[i+1]]
