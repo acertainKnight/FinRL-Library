@@ -165,6 +165,19 @@ class FeatureEngineer:
 
         df["daily_return"] = daily_return_df.values
 
+        lagclose_df = pd.DataFrame()
+        for i in range(len(unique_ticker)):
+            try:
+                temp_indicator = df[df.tic == unique_ticker[i]].close.shift(1)
+                temp_indicator = pd.DataFrame(temp_indicator)
+                lagclose_df = daily_return_df.append(
+                    temp_indicator, ignore_index=True
+                )
+            except Exception as e:
+                print(e)
+
+        df["lag_close1"] = lagclose_df.values
+        df["gap"] = np.subtract(df.open.values, df.lag_close1.values)
         df['log_volume'] = np.log(df.volume * df.close)
         df['change'] = np.divide(np.subtract(df.close.values, df.open.values), df.close.values)
         df['daily_variance'] = np.divide(np.subtract(df.high.values, df.low.values), df.close.values)
