@@ -237,9 +237,11 @@ class FeatureEngineer:
                                                          end=config.END_DATE,
                                                          freq='B').to_list()})
         holidays = list(mcal.get_calendar('NYSE').holidays().holidays)
+        print(holidays)
         date_df = date_df[~date_df['date_y'].isin(holidays)]
         date_df['date_y'] = pd.to_datetime(date_df['date_y'])
         date_df['date_y'] = date_df.date_y.apply(lambda x: x.strftime("%Y-%m-%d"))
+        print(date_df)
 
         df = data.copy()
         unique_ticker = df.tic.unique()

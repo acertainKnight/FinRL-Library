@@ -39,9 +39,9 @@ def main():
                          ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
 
     fe = FeatureEngineer(
-        use_technical_indicator=True,
+        use_technical_indicator=False,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
-        use_turbulence=True,
+        use_turbulence=False,
         user_defined_feature=False)
 
     processed = fe.preprocess_data(df)
