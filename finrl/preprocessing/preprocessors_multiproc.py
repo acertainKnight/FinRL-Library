@@ -61,13 +61,17 @@ class FeatureEngineer:
         if self.use_technical_indicator == True:
             with get_context("spawn").Pool() as pool:
                 result = pool.map(self.add_technical_indicator, index_list)
-            print(result)
             # add technical indicators using stockstats
             temp = pd.DataFrame()
             for res in result:
                 temp = temp.append(res)
-            df = temp
-            print(list(df))
+            numeric_columns = temp.select_dtypes(include=['number']).columns
+
+            temp[numeric_columns] = temp[numeric_columns].fillna(0)
+            temp = temp.fillna(method="bfill").fillna(method="ffill")
+            temp = temp.reset_index()
+            temp = temp.drop('index', axis=1)
+            df = temp.drop_duplicates(subset=['date', 'tic'])
             print("Successfully added technical indicators")
 
         # add turbulence index for multiple stock
@@ -298,10 +302,5 @@ class FeatureEngineer:
                 )
             except Exception as e:
                 print(e)
-        numeric_columns = final_df.select_dtypes(include=['number']).columns
 
-        final_df[numeric_columns] = final_df[numeric_columns].fillna(0)
-        final_df = final_df.fillna(method="bfill").fillna(method="ffill")
-        final_df.reset_index(inplace=True)
-        final_df.drop('index', axis=1, inplace=True)
         return final_df
