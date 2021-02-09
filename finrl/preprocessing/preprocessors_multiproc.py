@@ -298,6 +298,10 @@ class FeatureEngineer:
                 )
             except Exception as e:
                 print(e)
+        numeric_columns = final_df.select_dtypes(include=['number']).columns
 
-        final_df = final_df.fillna(0)
+        final_df[numeric_columns] = final_df[numeric_columns].fillna(0)
+        final_df = final_df.fillna(method="bfill").fillna(method="ffill")
+        final_df.reset_index(inplace=True)
+        final_df.drop('index', axis=1, inplace=True)
         return final_df
