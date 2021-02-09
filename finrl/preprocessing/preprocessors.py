@@ -254,6 +254,7 @@ class FeatureEngineer:
                 # print(type(date_df.date_y[0]))
                 temp_date_df = pd.merge(date_df, temp_ticker, how='left', left_on='date_y', right_on='date')
                 # print(temp_date_df)
+                temp_date_df['date'] = temp_date_df['date_y']
                 temp_date_df.drop('date_y', axis=1, inplace=True)
                 final_df = final_df.append(
                     temp_date_df, ignore_index=True
