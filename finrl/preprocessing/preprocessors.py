@@ -237,23 +237,23 @@ class FeatureEngineer:
                                                          end=config.END_DATE,
                                                          freq='B').to_list()})
         holidays = list(mcal.get_calendar('NYSE').holidays().holidays)
-        print(holidays)
+        # print(holidays)
         date_df = date_df[~date_df['date_y'].isin(holidays)]
         date_df['date_y'] = pd.to_datetime(date_df['date_y'])
         date_df['date_y'] = date_df.date_y.apply(lambda x: x.strftime("%Y-%m-%d"))
-        print(date_df)
+        # print(date_df)
 
         df = data.copy()
         unique_ticker = df.tic.unique()
         final_df = pd.DataFrame()
-        print(df)
+        # print(df)
         for i in range(len(unique_ticker)):
             try:
                 temp_ticker = df[df.tic == unique_ticker[i]]
                 temp_ticker = pd.DataFrame(temp_ticker)
                 # print(type(date_df.date_y[0]))
                 temp_date_df = pd.merge(date_df, temp_ticker, how='left', left_on='date_y', right_on='date')
-                print(temp_date_df)
+                # print(temp_date_df)
                 temp_date_df.drop('date_y', axis=1, inplace=True)
                 final_df = final_df.append(
                     temp_date_df, ignore_index=True
