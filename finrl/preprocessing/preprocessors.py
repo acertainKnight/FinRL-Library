@@ -250,7 +250,7 @@ class FeatureEngineer:
             try:
                 temp_ticker = df[df.tic == unique_ticker[i]]
                 temp_ticker = pd.DataFrame(temp_ticker)
-                print(type(temp_ticker.date[0]))
+                print(temp_ticker.date)
                 print(type(date_df.date_y[0]))
                 temp_date_df = pd.merge(date_df, temp_ticker, how='left', left_on='date_y', right_on='date')
                 temp_date_df.drop('date_y', axis=1, inplace=True)
