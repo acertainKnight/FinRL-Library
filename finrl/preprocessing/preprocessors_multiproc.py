@@ -97,13 +97,15 @@ class FeatureEngineer:
         print("Shape of DataFrame (w/indicators): ", df.shape)
         return df
 
-    def add_technical_indicator(self, data, idx=False):
+    def add_technical_indicator(self, params):
         """
         calcualte technical indicators
         use stockstats package to add technical inidactors
         :param data: (df) pandas dataframe
         :return: (df) pandas dataframe
         """
+        data = params[0]
+        idx = params[1]
         df = data.copy()
         stock = Sdf.retype(df.copy())
         unique_ticker = stock.tic.unique()
