@@ -36,13 +36,13 @@ def main():
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
+                         ticker_list=config.PENNY_STOCKS).fetch_data()
 
     fe = FeatureEngineer(
         use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
         use_turbulence=True,
-        user_defined_feature=True)
+        user_defined_feature=False)
 
     processed = fe.preprocess_data(df)
     information_cols = list(processed)

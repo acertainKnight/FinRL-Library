@@ -3,6 +3,8 @@ import pandas as pd
 from stockstats import StockDataFrame as Sdf
 from finrl.config import config
 from fredapi import Fred
+import pandas_market_calendars as mcal
+
 
 class FeatureEngineer:
     """Provides methods for preprocessing the stock price data
@@ -58,6 +60,7 @@ class FeatureEngineer:
             df = self.add_user_defined_feature(df)
             print("Successfully added user defined features")
 #         df = df.shift(1)
+        df = self.standardize_dates(df)
         # fill the missing values at the beginning and the end
         df.replace([np.inf, -np.inf], np.nan)
         df = df.fillna(method="bfill").fillna(method="ffill")
@@ -228,3 +231,28 @@ class FeatureEngineer:
             {"date": df_price_pivot.index, "turbulence": turbulence_index}
         )
         return turbulence_index
+
+    def standardize_dates(self, data):
+        date_df = pd.DataFrame({'date_y': pd.bdate_range(start=config.start_date,
+                                                         end=config.end_date,
+                                                         freq='B').to_list()})
+        holidays = mcal.get_calendar('NYSE').holidays().to_list()
+        date_df = date_df[~date_df['date_y'].isin(holidays)]
+
+        df = data.copy()
+        unique_ticker = df.tic.unique()
+        final_df = pd.DataFrame()
+        for i in range(len(unique_ticker)):
+            try:
+                temp_ticker = df[df.tic == unique_ticker[i]]
+                temp_ticker = pd.DataFrame(temp_ticker)
+                temp_date_df = pd.merge(date_df, temp_ticker, how='left', left_on='date_y', right_index='date')
+                temp_date_df.drop('date_y', axis=1, inplace=True)
+                final_df = final_df.append(
+                    temp_date_df, ignore_index=True
+                )
+            except Exception as e:
+                print(e)
+
+        final_df = final_df.fillna(0)
+        return final_df

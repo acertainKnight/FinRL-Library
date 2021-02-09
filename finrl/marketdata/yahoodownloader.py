@@ -55,7 +55,7 @@ class YahooDownloader:
             temp_df = yf.download(tic, start=self.start_date, end=self.end_date)
             if len(temp_df) < 1:
                 continue
-            elif temp_df.index[0] not in d_list:
+            # elif temp_df.index[0] not in d_list:
                 # date_df = pd.DataFrame({'date_y': pd.date_range(start=self.start_date,
                 #                                            end=self.end_date,
                 #                                            freq='D').to_list()})
@@ -63,8 +63,8 @@ class YahooDownloader:
                 # temp_date_df = pd.merge(date_df, temp_df, how='left', left_on='date_y', right_index=True)
                 # temp_date_df = temp_date_df.fillna(0)
                 # temp_date_df.drop('date_y', axis=1)
-                print('Tic not available over period; {}'.format(tic))
-                continue
+                # print('Tic not available over period; {}'.format(tic))
+                # continue
             else:
                 # date_col = temp_df.index
                 temp_date_df = temp_df.copy()
