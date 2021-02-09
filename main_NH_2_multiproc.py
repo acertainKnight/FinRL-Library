@@ -11,7 +11,7 @@ import datetime
 
 from finrl.config import config
 from finrl.marketdata.yahoodownloader import YahooDownloader
-from finrl.preprocessing.preprocessors import FeatureEngineer
+from finrl.preprocessing.preprocessors_multiproc import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
 from finrl.model.models_multiproc import DRLAgent, DRLEnsembleAgent
