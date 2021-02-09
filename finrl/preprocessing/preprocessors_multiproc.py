@@ -45,8 +45,16 @@ class FeatureEngineer:
         @:param config: source dataframe
         @:return: a DataMatrices object
         """
-        index_list = range(0, len(df.tic.unique()), len(df.tic.unique())/cpu_count())
-
+        tempindex_list = range(0, len(df.tic.unique()), int(len(df.tic.unique())/cpu_count()))
+        print(len(df.tic.unique()))
+        print(tempindex_list)
+        index_list = []
+        for i in range(len(tempindex_list)):
+            if i == len(tempindex_list):
+                _ = [tempindex_list[i], len(df.tic.unique())]
+            else:
+                _ = [tempindex_list[i], tempindex_list[i+1]]
+            index_list.append(_)
 
         if self.use_technical_indicator == True:
             with get_context("spawn").Pool() as pool:
