@@ -45,7 +45,7 @@ class FeatureEngineer:
         @:param config: source dataframe
         @:return: a DataMatrices object
         """
-        tempindex_list = range(0, len(df.tic.unique()), int(len(df.tic.unique())/cpu_count()))
+        tempindex_list = list(range(0, len(df.tic.unique()), int(len(df.tic.unique())/cpu_count())))
         print(len(df.tic.unique()))
         print(tempindex_list)
         index_list = []
