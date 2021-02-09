@@ -246,12 +246,12 @@ class FeatureEngineer:
         df = data.copy()
         unique_ticker = df.tic.unique()
         final_df = pd.DataFrame()
+        print(df)
         for i in range(len(unique_ticker)):
             try:
                 temp_ticker = df[df.tic == unique_ticker[i]]
                 temp_ticker = pd.DataFrame(temp_ticker)
-                print(temp_ticker.date)
-                print(type(date_df.date_y[0]))
+                # print(type(date_df.date_y[0]))
                 temp_date_df = pd.merge(date_df, temp_ticker, how='left', left_on='date_y', right_on='date')
                 print(temp_date_df)
                 temp_date_df.drop('date_y', axis=1, inplace=True)
