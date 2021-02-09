@@ -52,9 +52,9 @@ class FeatureEngineer:
         for i in range(len(tempindex_list)):
             print(i)
             if i == list(range(len(tempindex_list)))[-1]:
-                _ = [tempindex_list[i], len(df.tic.unique())]
+                _ = [df, [tempindex_list[i], 1+len(df.tic.unique())]]
             else:
-                _ = [tempindex_list[i], tempindex_list[i+1]]
+                _ = [df, [tempindex_list[i], tempindex_list[i+1]]]
             index_list.append(_)
         print(index_list)
 
