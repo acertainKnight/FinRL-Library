@@ -65,7 +65,7 @@ class FeatureEngineer:
             # add technical indicators using stockstats
             temp = pd.DataFrame()
             for res in result:
-                temp.append(res)
+                temp = temp.append(res)
             df = temp
             print(list(df))
             print("Successfully added technical indicators")
