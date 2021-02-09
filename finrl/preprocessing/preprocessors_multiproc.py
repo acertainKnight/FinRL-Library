@@ -66,6 +66,7 @@ class FeatureEngineer:
             for res in result:
                 temp.append(res)
             df = temp
+            print(list(df))
             print("Successfully added technical indicators")
 
         # add turbulence index for multiple stock
