@@ -46,17 +46,17 @@ class FeatureEngineer:
         @:return: a DataMatrices object
         """
         tempindex_list = list(range(0, len(df.tic.unique()), int(len(df.tic.unique())/cpu_count())))
-        print(len(df.tic.unique()))
-        print(tempindex_list)
+        # print(len(df.tic.unique()))
+        # print(tempindex_list)
         index_list = []
         for i in range(len(tempindex_list)):
-            print(i)
+            # print(i)
             if i == list(range(len(tempindex_list)))[-1]:
                 _ = [df, [tempindex_list[i], 1+len(df.tic.unique())]]
             else:
                 _ = [df, [tempindex_list[i], tempindex_list[i+1]]]
             index_list.append(_)
-        print(index_list[1][1])
+        # print(index_list[1][1])
 
         if self.use_technical_indicator == True:
             with get_context("spawn").Pool() as pool:
@@ -104,7 +104,7 @@ class FeatureEngineer:
         :param data: (df) pandas dataframe
         :return: (df) pandas dataframe
         """
-        print(params)
+        # print(params)
         data = params[0]
         idx = params[1]
         df = data.copy()
@@ -113,7 +113,7 @@ class FeatureEngineer:
         if idx:
             for indicator in self.tech_indicator_list:
                 indicator_df = pd.DataFrame()
-                for i in range(len(unique_ticker[idx[0], idx[1]])):
+                for i in range(len(unique_ticker[idx[0]: idx[1]])):
                     try:
                         temp_indicator = stock[stock.tic == unique_ticker[i]][indicator]
                         temp_indicator = pd.DataFrame(temp_indicator)
