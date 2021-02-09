@@ -56,6 +56,7 @@ class FeatureEngineer:
             else:
                 _ = [tempindex_list[i], tempindex_list[i+1]]
             index_list.append(_)
+        print(index_list)
 
         if self.use_technical_indicator == True:
             with get_context("spawn").Pool() as pool:
@@ -96,7 +97,7 @@ class FeatureEngineer:
         print("Shape of DataFrame (w/indicators): ", df.shape)
         return df
 
-    def add_technical_indicator(self, data):
+    def add_technical_indicator(self, data, idx=False):
         """
         calcualte technical indicators
         use stockstats package to add technical inidactors
@@ -106,18 +107,32 @@ class FeatureEngineer:
         df = data.copy()
         stock = Sdf.retype(df.copy())
         unique_ticker = stock.tic.unique()
-        for indicator in self.tech_indicator_list:
-            indicator_df = pd.DataFrame()
-            for i in range(len(unique_ticker)):
-                try:
-                    temp_indicator = stock[stock.tic == unique_ticker[i]][indicator]
-                    temp_indicator = pd.DataFrame(temp_indicator)
-                    indicator_df = indicator_df.append(
-                        temp_indicator, ignore_index=True
-                    )
-                except Exception as e:
-                    print(e)
-            df[indicator] = indicator_df
+        if idx:
+            for indicator in self.tech_indicator_list:
+                indicator_df = pd.DataFrame()
+                for i in range(len(unique_ticker[idx[0], idx[1]])):
+                    try:
+                        temp_indicator = stock[stock.tic == unique_ticker[i]][indicator]
+                        temp_indicator = pd.DataFrame(temp_indicator)
+                        indicator_df = indicator_df.append(
+                            temp_indicator, ignore_index=True
+                        )
+                    except Exception as e:
+                        print(e)
+                df[indicator] = indicator_df
+        else:
+            for indicator in self.tech_indicator_list:
+                indicator_df = pd.DataFrame()
+                for i in range(len(unique_ticker)):
+                    try:
+                        temp_indicator = stock[stock.tic == unique_ticker[i]][indicator]
+                        temp_indicator = pd.DataFrame(temp_indicator)
+                        indicator_df = indicator_df.append(
+                            temp_indicator, ignore_index=True
+                        )
+                    except Exception as e:
+                        print(e)
+                df[indicator] = indicator_df
         return df
 
     def add_user_defined_feature(self, data):
