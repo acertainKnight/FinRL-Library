@@ -60,7 +60,7 @@ class FeatureEngineer:
 
         if self.use_technical_indicator == True:
             with get_context("spawn").Pool() as pool:
-                result = pool.map(self.add_technical_indicator(), index_list)
+                result = pool.map(self.add_technical_indicator, index_list)
             # add technical indicators using stockstats
             temp = pd.DataFrame()
             for res in result:
