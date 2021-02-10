@@ -1,6 +1,6 @@
 import os
 
-ALPACA_ENDPOINT = "https://paper-api.alpaca.markets"
+ALPACA_ENDPOINT = "https://api.alpaca.markets"
 ALPACA_KEYID = "AKFIW68Z45DJVQHJJP5L"
 ALPACA_SECRETKEY = "FtUVTAl9PzUaKwSf3XMPOimUk8UAnLiSuqkTO5CD"
 
@@ -25,10 +25,10 @@ from finrl.config import config # loads API Keys as environment variables
 def main():
     api = tradeapi.REST()
 
-    DATADIR = os.path.join('..', 'historical-market-data') # download directory for the data
-    SYMBOLS = config.BRDGWTR_50_TICKER# list of symbols we're interested
-    FROM_DATE = config.START_DATE
-    TO_DATE = config.END_DATE
+    DATADIR = os.path.join('/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA', 'BRDGWTR_50') # download directory for the data
+    SYMBOLS = config.BRDGWTR_50_TICKER # list of symbols we're interested
+    FROM_DATE = '2009-01-01'
+    TO_DATE = '2021-01-01'
 
     # create data directory if it doesn't exist
     if not os.path.exists(DATADIR):
@@ -54,14 +54,14 @@ def main():
             df = api.polygon.historic_agg_v2(
                 symbol=symbol,
                 multiplier=1,
-                timespan='min',
+                timespan='minute',
                 _from=_from,
                 to=_to,
                 unadjusted=False
             ).df
 
             if df.empty:
-                tqdm.write(f'Error downloading data for date {_from}')
+                tqdm.write(f'Error downloading data for date {symbol} {_from}')
                 continue
 
             # filter times in which the market in open
