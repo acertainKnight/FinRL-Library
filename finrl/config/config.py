@@ -29,6 +29,16 @@ TENSORBOARD_LOG_DIR = f"tensorboard_log"
 RESULTS_DIR = f"results"
 # os.makedirs(TRAINED_MODEL_DIR)
 
+"""
+Put secret Keys as environment variables
+"""
+ALPACA_ENDPOINT = "https://paper-api.alpaca.markets"
+ALPACA_KEYID = "AKFIW68Z45DJVQHJJP5L"
+ALPACA_SECRETKEY = "FtUVTAl9PzUaKwSf3XMPOimUk8UAnLiSuqkTO5CD"
+
+# os.environ["APCA_API_KEY_ID"] = ALPACA_KEYID
+# os.environ["APCA_API_SECRET_KEY"] = ALPACA_SECRETKEY
+# os.environ["APCA_API_BASE_URL"] = ALPACA_ENDPOINT
 
 ## time_fmt = '%Y-%m-%d'
 START_DATE = "2009-01-01"
