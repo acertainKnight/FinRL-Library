@@ -54,7 +54,7 @@ def main():
             df = api.polygon.historic_agg_v2(
                 symbol=symbol,
                 multiplier=1,
-                timespan='5min',
+                timespan='min',
                 _from=_from,
                 to=_to,
                 unadjusted=False
