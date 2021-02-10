@@ -12,7 +12,7 @@ os.environ["APCA_API_BASE_URL"] = ALPACA_ENDPOINT
 Download historical minute by minute data for a symbol between a range of dates
 """
 
-# Install a pip package in the current Jupyter kernel
+# Install a pip package in the currenta Jupyter kernel
 import os
 
 import pandas as pd
