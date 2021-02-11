@@ -69,9 +69,10 @@ class YahooDownloader:
                 # date_col = temp_df.index
                 temp_date_df = temp_df.copy()
             temp_date_df["tic"] = tic
-            temp_date_df["sector"] = yf.ticker(tic).info['sector']
-            temp_date_df.sector = pd.Categorical(temp_date_df.sector)
-            temp_date_df['sector'] = temp_date_df.sector.cat.codes
+            # yfticker = yf.Ticker(tic)
+            # temp_date_df["sector"] = yfticker.info['sector']
+            # temp_date_df.sector = pd.Categorical(temp_date_df.sector)
+            # temp_date_df['sector'] = temp_date_df.sector.cat.codes
             temp_date_df.drop_duplicates(inplace=True)
             data_df = data_df.append(temp_date_df)
             i += 1
@@ -90,7 +91,7 @@ class YahooDownloader:
                 "adjcp",
                 "volume",
                 "tic",
-                "sector"
+                # "sector"
             ]
             # use adjusted close price instead of close price
             data_df["close"] = data_df["adjcp"]

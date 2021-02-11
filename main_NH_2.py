@@ -11,7 +11,7 @@ import datetime
 
 from finrl.config import config
 from finrl.marketdata.yahoodownloader import YahooDownloader
-from finrl.preprocessing.preprocessors import FeatureEngineer
+from finrl.preprocessing.preprocessors_multiproc import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
 from finrl.model.models import DRLAgent, DRLEnsembleAgent
@@ -32,17 +32,17 @@ def main():
 
     print(config.START_DATE)
     print(config.END_DATE)
-    print(config.BRDGWTR_50_TICKER)
+    print(config.PENNY_STOCKS)
 
     df = YahooDownloader(start_date=config.START_DATE,
                          end_date=config.END_DATE,
-                         ticker_list=config.BRDGWTR_50_TICKER).fetch_data()
+                         ticker_list=config.DOW_30_TICKER).fetch_data()
 
     fe = FeatureEngineer(
-        use_technical_indicator=False,
+        use_technical_indicator=True,
         tech_indicator_list=config.TECHNICAL_INDICATORS_LIST,
-        use_turbulence=False,
-        user_defined_feature=False)
+        use_turbulence=True,
+        user_defined_feature=True)
 
     processed = fe.preprocess_data(df)
     information_cols = list(processed)
@@ -51,8 +51,7 @@ def main():
 
     stock_dimension = len(processed.tic.unique())
     state_space = 1 + 2 * stock_dimension + len(information_cols) * stock_dimension
-    print(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
-
+    print("Stock Dimension: {}, State Space: {}".format(stock_dimension, state_space))
 
     env_kwargs = {
         "hmax": 100,
@@ -98,7 +97,7 @@ def main():
 
     DDPG_model_kwargs = {
         "action_noise": "ornstein_uhlenbeck",
-        "buffer_size": 50_000,
+        "buffer_size": 50000,
         "learning_rate": 0.000005,
         "batch_size": 128
     }
@@ -109,10 +108,10 @@ def main():
         "learning_rate": 0.001
     }
 
-    timesteps_dict = {'a2c': 100000,
-                      'ppo': 100000,
-                      'ddpg': 50000,
-                      'td3': 50000
+    timesteps_dict = {'a2c': 20000,
+                      'ppo': 20000,
+                      'ddpg': 10000,
+                      'td3': 10000
                       }
 
     df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,
@@ -138,7 +137,8 @@ def main():
             df_account_value = df_account_value.append(temp, ignore_index=True)
         except:
             break
-    sharpe = (252 ** 0.5) * df_account_value.account_value.pct_change(1).mean() / df_account_value.account_value.pct_change(1).std()
+    sharpe = (252 ** 0.5) * df_account_value.account_value.pct_change(
+        1).mean() / df_account_value.account_value.pct_change(1).std()
     print('Sharpe Ratio: ', sharpe)
     df_account_value = df_account_value.join(df_trade_date[validation_window:].reset_index(drop=True))
 

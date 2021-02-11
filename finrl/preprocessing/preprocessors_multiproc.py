@@ -170,7 +170,7 @@ class FeatureEngineer:
             try:
                 temp_indicator = df[df.tic == unique_ticker[i]].close.shift(1)
                 temp_indicator = pd.DataFrame(temp_indicator)
-                lagclose_df = daily_return_df.append(
+                lagclose_df = lagclose_df.append(
                     temp_indicator, ignore_index=True
                 )
             except Exception as e:
@@ -198,34 +198,34 @@ class FeatureEngineer:
             except Exception as e:
                 print(e)
 
-        fred = Fred(api_key='a2ca2601550a3ac2a1af260112595a8d')
-        temp = df['date'].to_frame()
-        for series in ['EFFR',
-#                        'UNRATE',
-#                        'DEXUSEU',
-#                        'TEDRATE',
-#                        'DTWEXBGS',
-#                        'VIXCLS',
-#                        'DEXCHUS',
-#                        'USRECD',
-#                        'DTWEXEMEGS',
-#                        'VXEEMCLS',
-#                        'A191RL1Q225SBEA',
-#                        'GFDEGDQ188S',
-#                        'DPCERL1Q225SBEA'
-                      ]:
-
-            data = fred.get_series(series)
-            data = data.to_frame()
-            data = data.reset_index()
-            data.columns = [
-                "date",
-                series
-            ]
-            data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
-            temp_2 = pd.merge(temp, data, how='left', left_on='date', right_on='date')
-            temp.fillna(method="ffill")
-            df = pd.merge(df, data, how='left', left_on='date', right_on='date')
+#         fred = Fred(api_key='a2ca2601550a3ac2a1af260112595a8d')
+#         temp = df['date'].to_frame()
+#         for series in ['EFFR',
+# #                        'UNRATE',
+# #                        'DEXUSEU',
+# #                        'TEDRATE',
+# #                        'DTWEXBGS',
+# #                        'VIXCLS',
+# #                        'DEXCHUS',
+# #                        'USRECD',
+# #                        'DTWEXEMEGS',
+# #                        'VXEEMCLS',
+# #                        'A191RL1Q225SBEA',
+# #                        'GFDEGDQ188S',
+# #                        'DPCERL1Q225SBEA'
+#                       ]:
+#
+#             data = fred.get_series(series)
+#             data = data.to_frame()
+#             data = data.reset_index()
+#             data.columns = [
+#                 "date",
+#                 series
+#             ]
+#             data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+#             temp_2 = pd.merge(temp, data, how='left', left_on='date', right_on='date')
+#             temp.fillna(method="ffill")
+#             df = pd.merge(df, data, how='left', left_on='date', right_on='date')
 
         return df
 

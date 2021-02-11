@@ -26,7 +26,7 @@ def main():
     api = tradeapi.REST()
 
     DATADIR = os.path.join(os.getcwd(),'datasets/ALPACA', 'BRDGWTR_50') # download directory for the data
-    SYMBOLS = config.BRDGWTR_50_TICKER + config.PENNY_STOCKS# list of symbols we're interested
+    SYMBOLS = config.PENNY_STOCKS_2 + config.BRDGWTR_50_TICKER# list of symbols we're interested
     FROM_DATE = '2009-01-01'
     TO_DATE = '2021-01-01'
 
@@ -65,7 +65,7 @@ def main():
                 continue
 
             # filter times in which the market in open
-            df = df.between_time('9:30', '16:00')
+            # df = df.between_time('9:30', '16:00')
 
             # saving csv for the data of the day in DATADIR/fname
             symbol_df = symbol_df.append(df)
