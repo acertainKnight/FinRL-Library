@@ -132,9 +132,9 @@ def stack(params):
                     #     df_full = pd.merge(df_full, data, how='left', left_on='date', right_on='date')
 
                     # print(df_full.columns)
-                    print('Saving: {}'.format(fname[len(path_sub)+1:]))
+                    # print('Saving: {}'.format(fname[len(path_sub)+1:]))
                     # df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
-                    print('Complete')
+                    # print('Complete')
                     df_stacked = df_stacked.append(df_full)
                     ___ += 1
     return df_stacked
@@ -165,6 +165,7 @@ def preprocess():
     print('Saving Final')
     df_stackFULL.tic = pd.Categorical(df_stackFULL.tic)
     df_stackFULL['tic_cat'] = df_stackFULL.tic.cat.codes
+    df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
     return df_stackFULL
 
 
