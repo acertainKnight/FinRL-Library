@@ -142,10 +142,10 @@ def stack(params):
     return df_stacked
 
 def preprocess():
-    path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
-    path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
-    # path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
-    # path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
+    # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
+    # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
+    path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
+    path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
     tempindex_list = list(range(0, temp, int(temp / cpu_count())))
