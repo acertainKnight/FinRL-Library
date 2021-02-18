@@ -224,7 +224,8 @@ def calculate_turbulence(data):
         else:
             turbulence_temp = 0
         turbulence_index.append(turbulence_temp)
-
+    print(len(df_price_pivot.index))
+    print(len(turbulence_index.index))
     turbulence_index = pd.DataFrame(
         {"timestamp": df_price_pivot.index, "turbulence": turbulence_index}
     )
