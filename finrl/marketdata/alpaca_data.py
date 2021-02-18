@@ -109,7 +109,7 @@ if __name__ == "__main__":
     path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
     path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
     temp = len(glob.glob(os.path.join(path, '*.csv')))
-    tempindex_list = list(range(0, len(temp), int(len(temp) / cpu_count())))
+    tempindex_list = list(range(0, temp, int(temp / cpu_count())))
     # print(len(df.tic.unique()))
     # print(tempindex_list)
     index_list = []
