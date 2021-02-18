@@ -93,7 +93,11 @@ def stack(params):
                         df_full = pd.merge(df_full, df2, how='left', left_index=True, right_index=True)
                     df_full = df_full.drop(['timestamp_x', 'timestamp_y'], axis=1)
                     df_full.reset_index(inplace=True)
-                    df_full = df_full.rename({'index': 'timestamp'}, axis=1)
+                    df_full = df_full.rename({'index': 'timestamp',
+                                              'open_x_x': 'open',
+                                              'high_x_x': 'high',
+                                              'low_x_x': 'low',
+                                              'close_x_x': 'close',}, axis=1)
                     df_full['date'] = df_full.timestamp.dt.date
                     df_full['day'] = df_full.timestamp.dt.dayofweek
                     df_full['week'] = df_full.timestamp.dt.isocalendar().week
@@ -131,7 +135,7 @@ def stack(params):
                     #     # temp.fillna(method="ffill")
                     #     df_full = pd.merge(df_full, data, how='left', left_on='date', right_on='date')
 
-                    # print(df_full.columns)
+                    print(df_full.columns)
                     # print('Saving: {}'.format(fname[len(path_sub)+1:]))
                     # df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
                     # print('Complete')
@@ -166,7 +170,65 @@ def preprocess():
     df_stackFULL.tic = pd.Categorical(df_stackFULL.tic)
     df_stackFULL['tic_cat'] = df_stackFULL.tic.cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+    df_stackFULL
     return df_stackFULL
+
+def add_turbulence(data):
+    """
+    add turbulence index from a precalcualted dataframe
+    :param data: (df) pandas dataframe
+    :return: (df) pandas dataframe
+    """
+    df = data.copy()
+    turbulence_index = calculate_turbulence(df)
+    df = df.merge(turbulence_index, on="timestamp")
+    df = df.sort_values(["timestamp", "tic"]).reset_index(drop=True)
+    return df
+
+def calculate_turbulence(data):
+    """calculate turbulence index based on dow 30"""
+    # can add other market assets
+    df = data.copy()
+    df_price_pivot = df.pivot(index="timestamp", columns="tic", values="close")
+    # use returns to calculate turbulence
+    df_price_pivot = df_price_pivot.pct_change()
+
+    unique_date = df.date.unique()
+    # start after a year
+    start = 63*27
+    turbulence_index = [0] * start
+    # turbulence_index = [0]
+    count = 0
+    for i in range(start, len(unique_date)):
+        current_price = df_price_pivot[df_price_pivot.index == unique_date[i]]
+        # use one year rolling window to calcualte covariance
+        hist_price = df_price_pivot[
+            (df_price_pivot.index < unique_date[i])
+            & (df_price_pivot.index >= unique_date[i - start])
+        ]
+        # Drop tickers which has number missing values more than the "oldest" ticker
+        filtered_hist_price = hist_price.iloc[hist_price.isna().sum().min():].dropna(axis=1)
+
+        cov_temp = filtered_hist_price.cov()
+        current_temp = current_price[[x for x in filtered_hist_price]] - np.mean(filtered_hist_price, axis=0)
+        temp = current_temp.values.dot(np.linalg.pinv(cov_temp)).dot(
+            current_temp.values.T
+        )
+        if temp > 0:
+            count += 1
+            if count > 2:
+                turbulence_temp = temp[0][0]
+            else:
+                # avoid large outlier because of the calculation just begins
+                turbulence_temp = 0
+        else:
+            turbulence_temp = 0
+        turbulence_index.append(turbulence_temp)
+
+    turbulence_index = pd.DataFrame(
+        {"timestamp": df_price_pivot.index, "turbulence": turbulence_index}
+    )
+    return turbulence_index
 
 
 
