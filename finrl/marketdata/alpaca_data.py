@@ -4,6 +4,7 @@ import os
 import talib as ta
 import numpy as np
 from multiprocessing import get_context, cpu_count
+from fredapi import Fred
 
 
 def minto15_alpaca(path):
@@ -91,30 +92,62 @@ def stack(params):
                         # df2 = pd.merge(df2, df.diff(27), how='left', left_index=True, right_index=True)
                         df_full = pd.merge(df_full, df2, how='left', left_index=True, right_index=True)
                     df_full = df_full.drop(['timestamp_x', 'timestamp_y'], axis=1)
+                    df_full.reset_index(inplace=True)
+                    df_full = df_full.rename({'index': 'timestamp'}, axis=1)
+                    df_full['date'] = df_full.timestamp.dt.date
+                    df_full['day'] = df_full.timestamp.dt.dayofweek
+                    df_full['week'] = df_full.timestamp.dt.isocalendar().week
+                    df_full['hour'] = df_full.timestamp.dt.hour
+                    df_full['quarter'] = df_full.timestamp.dt.quarter
+                    tic = fname[len(path_sub)+1:-19]
+                    df_full['tic'] = tic
+
+                    # fred = Fred(api_key=r'a2ca2601550a3ac2a1af260112595a8d')
+                    # # temp = df['date'].to_frame()
+                    # for series in ['EFFR',
+                    #                'UNRATE',
+                    #                'DEXUSEU',
+                    #                'TEDRATE',
+                    #                'DTWEXBGS',
+                    #                'VIXCLS',
+                    #                'DEXCHUS',
+                    #                'USRECD',
+                    #                'DTWEXEMEGS',
+                    #                'VXEEMCLS',
+                    #                'A191RL1Q225SBEA',
+                    #                'GFDEGDQ188S',
+                    #                'DPCERL1Q225SBEA'
+                    #               ]:
+                    #
+                    #     data = fred.get_series(series)
+                    #     data = data.to_frame()
+                    #     data = data.reset_index()
+                    #     data.columns = [
+                    #         "date",
+                    #         series
+                    #     ]
+                    #     # data["date"] = data.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+                    #     # temp_2 = pd.merge(temp, data, how='left', left_on='date', right_on='date')
+                    #     # temp.fillna(method="ffill")
+                    #     df_full = pd.merge(df_full, data, how='left', left_on='date', right_on='date')
+
                     # print(df_full.columns)
                     df_full = df_full.fillna(method='ffill').fillna(0)
-                    print('Saving: {}'.format(fname[53:]))
+                    print(df_full.head())
+                    print('Saving: {}'.format(fname[len(path_sub)+1:]))
                     # df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
                     print('Complete')
                     df_stacked = df_stacked.append(df_full)
                     ___ += 1
     return df_stacked
 
-
-
-
-
-if __name__ == "__main__":
-    # minto15_alpaca(r"/Users/Nick/Documents/tic_data/datasets/ALPACA")
-    # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
-    # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
-    path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
-    path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
+def preprocess():
+    path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
+    path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
+    # path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
+    # path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
-    print(temp)
-    print(cpu_count())
-    print(int(temp / cpu_count()))
     tempindex_list = list(range(0, temp, int(temp / cpu_count())))
     # print(len(df.tic.unique()))
     # print(tempindex_list)
@@ -132,4 +165,16 @@ if __name__ == "__main__":
     for df in result:
         df_stackFULL = df_stackFULL.append(df)
     print('Saving Final')
-    df_stackFULL.to_csv(r'/mnt/disks/MNT_DIR/FinRL-Library/datasets/alpaca.csv')
+    df_stackFULL['tic_cat'] = df_stackFULL.tic.cat.codes
+    return df_stackFULL
+
+
+
+
+
+if __name__ == "__main__":
+    # minto15_alpaca(r"/Users/Nick/Documents/tic_data/datasets/ALPACA")
+    path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
+    path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
+    stack([path2, [0, 2]])
+
