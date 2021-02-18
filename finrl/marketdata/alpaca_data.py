@@ -94,7 +94,7 @@ def stack(params):
                     # print(df_full.columns)
                     df_full = df_full.fillna(method='ffill').fillna(0)
                     print('Saving: {}'.format(fname[53:]))
-                    df_full.to_csv(r'/Users/Nick/Documents/GitHub/FinRL-Library/datasets/{}'.format(fname[53:]))
+                    df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
                     print('Complete')
                     df_stacked = df_stacked.append(df_full)
                     ___ += 1
