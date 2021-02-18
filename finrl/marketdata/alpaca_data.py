@@ -135,7 +135,7 @@ def stack(params):
                     #     # temp.fillna(method="ffill")
                     #     df_full = pd.merge(df_full, data, how='left', left_on='date', right_on='date')
 
-                    print(df_full.columns)
+                    # print(df_full.columns)
                     # print('Saving: {}'.format(fname[len(path_sub)+1:]))
                     # df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
                     # print('Complete')
@@ -170,7 +170,7 @@ def preprocess():
     df_stackFULL.tic = pd.Categorical(df_stackFULL.tic)
     df_stackFULL['tic_cat'] = df_stackFULL.tic.cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
-    df_stackFULL
+    df_stackFULL = add_turbulence(df_stackFULL)
     return df_stackFULL
 
 def add_turbulence(data):
