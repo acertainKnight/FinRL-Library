@@ -50,7 +50,7 @@ def stack(params):
                 path_sub = os.path.join(root, d)  # this is the current subfolder
                 ___ = 0
                 for fname in glob.glob(os.path.join(path_sub, '*.csv'))[idx[0]:idx[1]]:
-                    print(len(glob.glob(os.path.join(path_sub, '*.csv'))) - ___)
+                    print(len(glob.glob(os.path.join(path_sub, '*.csv'))[idx[0]:idx[1]]) - ___)
                     df_raw = pd.read_csv(fname)
                     # print(df_raw.columns)
                     df_raw['timestamp'] = pd.to_datetime(df_raw['Unnamed: 0'], format='%Y-%m-%d %H:%M:%S', utc=True)
