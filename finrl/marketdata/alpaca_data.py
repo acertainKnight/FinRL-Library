@@ -108,8 +108,8 @@ if __name__ == "__main__":
     # minto15_alpaca(r"/Users/Nick/Documents/tic_data/datasets/ALPACA")
     # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
     # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
-    path = r"/home/nghallmark/FinRL-Library/datasets/ALPACA/15min"
-    path2 = r"/home/nghallmark/FinRL-Library/datasets/ALPACA"
+    path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
+    path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
     print(temp)
@@ -132,4 +132,4 @@ if __name__ == "__main__":
     for df in result:
         df_stackFULL = df_stackFULL.append(df)
     print('Saving Final')
-    df_stackFULL.to_csv(r'/home/nghallmark/FinRL-Library/datasets/alpaca.csv')
+    df_stackFULL.to_csv(r'/mnt/disks/MNT_DIR/FinRL-Library/datasets/alpaca.csv')
