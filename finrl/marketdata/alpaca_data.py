@@ -195,7 +195,7 @@ def calculate_turbulence(data):
 
     unique_date = df.date.unique()
     # start after a year
-    start = 63*27
+    start = 63*28
     turbulence_index = [0] * start
     # turbulence_index = [0]
     count = 0

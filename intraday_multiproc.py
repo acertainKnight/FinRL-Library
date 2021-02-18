@@ -61,8 +61,8 @@ def main():
 
     }
 
-    rebalance_window = 63*27  # rebalance_window is the number of days to retrain the model
-    validation_window = 63*27  # validation_window is the number of days to do validation and trading (e.g. if validation_window=63, then both validation and trading period will be 63 days)
+    rebalance_window = 63*28  # rebalance_window is the number of days to retrain the model
+    validation_window = 63*28  # validation_window is the number of days to do validation and trading (e.g. if validation_window=63, then both validation and trading period will be 63 days)
     train_start = config.START_DATE
     train_end = config.START_TRADE_DATE
     val_test_start = config.START_TRADE_DATE
