@@ -45,7 +45,7 @@ def stack(params):
     df_stacked = pd.DataFrame()
     for root, dirs, _ in os.walk(path):
         for d in dirs:
-            if d != '_15min':
+            if d != '15min':
                 continue
             else:
                 path_sub = os.path.join(root, d)  # this is the current subfolder
@@ -137,7 +137,7 @@ def stack(params):
                     #     df_full = pd.merge(df_full, data, how='left', left_on='date', right_on='date')
 
                     # print(df_full.columns)
-                    # print('Saving: {}'.format(fname[len(path_sub)+1:]))
+                    print('Saving: {}'.format(fname[len(path_sub)+1:]))
                     # df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
                     # print('Complete')
                     df_stacked = df_stacked.append(df_full)
