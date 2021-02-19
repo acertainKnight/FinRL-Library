@@ -170,8 +170,8 @@ def preprocess():
     for df in result:
         df_stackFULL = df_stackFULL.append(df)
     print('Saving Final')
-    df_stackFULL.tic = pd.Categorical(df_stackFULL.tic)
-    df_stackFULL['tic_cat'] = df_stackFULL.tic.cat.codes
+    df_stackFULL.tic = pd.Categorical(df_stackFULL['tic'])
+    df_stackFULL['tic_cat'] = df_stackFULL['tic'].cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
     df_stackFULL = add_turbulence(df_stackFULL)
     print(df_stackFULL.head())
