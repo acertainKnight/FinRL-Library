@@ -45,7 +45,7 @@ def stack(params):
     df_stacked = pd.DataFrame()
     for root, dirs, _ in os.walk(path):
         for d in dirs:
-            if d != '15min':
+            if d != '_test':
                 continue
             else:
                 path_sub = os.path.join(root, d)  # this is the current subfolder
@@ -105,6 +105,7 @@ def stack(params):
                     df_full['quarter'] = df_full.timestamp.dt.quarter
                     tic = fname[len(path_sub)+1:-19]
                     df_full['tic'] = tic
+                    df_full = df_full.fillna(method='ffill').fillna(0)
 
                     # fred = Fred(api_key=r'a2ca2601550a3ac2a1af260112595a8d')
                     # # temp = df['date'].to_frame()
@@ -148,6 +149,8 @@ def preprocess():
     # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
     path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
     path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
+    # path = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA/_test"
+    # path2 = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
     tempindex_list = list(range(0, temp, int(temp / cpu_count())))
@@ -171,6 +174,7 @@ def preprocess():
     df_stackFULL['tic_cat'] = df_stackFULL.tic.cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
     df_stackFULL = add_turbulence(df_stackFULL)
+    print(df_stackFULL.head())
     return df_stackFULL
 
 def add_turbulence(data):
@@ -185,10 +189,9 @@ def add_turbulence(data):
     # print(len(df.tic.unique()))
     # print(tempindex_list)
     index_list = []
-    for i in range(len(tempindex_list)):
-        # print(i)
+    for i in range(len(tempindex_list)-1):
         if i == list(range(len(tempindex_list)))[-1]:
-            _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], 1 + temp]]
+            _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], temp+1]]
         else:
             _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], tempindex_list[i + 1]]]
         index_list.append(_)
@@ -205,14 +208,20 @@ def add_turbulence(data):
 def calculate_turbulence(params):
     """calculate turbulence index based on dow 30"""
     # can add other market assets
-    df = params[0].iloc[params[1][0]:params[1][1]].copy()
+    idx = params[1]
+    df = params[0]
     df_price_pivot = df.pivot(index="timestamp", columns="tic", values="close")
     # use returns to calculate turbulence
     df_price_pivot = df_price_pivot.pct_change()
-
-    unique_date = df.timestamp.unique()
+    df_price_pivot = df_price_pivot.iloc[idx[0]:idx[1], :]
+    df_price_pivot = df_price_pivot.fillna(0)
+    unique_date = df_price_pivot.index
+    print(len(unique_date))
     # start after a year
-    start = 63*28
+    if idx[0] == 0:
+        start = 63*27
+    else:
+        start = 0
     turbulence_index = [0] * start
     # turbulence_index = [0]
     count = 0
@@ -221,16 +230,22 @@ def calculate_turbulence(params):
         # use one year rolling window to calcualte covariance
         hist_price = df_price_pivot[
             (df_price_pivot.index < unique_date[i])
-            & (df_price_pivot.index >= unique_date[i - start])
+            & (df_price_pivot.index >= unique_date[i - 63*27])
         ]
         # Drop tickers which has number missing values more than the "oldest" ticker
         filtered_hist_price = hist_price.iloc[hist_price.isna().sum().min():].dropna(axis=1)
-
-        cov_temp = filtered_hist_price.cov()
+        try:
+            cov_temp = filtered_hist_price.cov()
+        except:
+            break
         current_temp = current_price[[x for x in filtered_hist_price]] - np.mean(filtered_hist_price, axis=0)
-        temp = current_temp.values.dot(np.linalg.pinv(cov_temp)).dot(
-            current_temp.values.T
-        )
+        try:
+            temp = current_temp.values.dot(np.linalg.pinv(cov_temp)).dot(
+                current_temp.values.T
+            )
+        except:
+            temp = 0
+
         if temp > 0:
             count += 1
             if count > 2:
