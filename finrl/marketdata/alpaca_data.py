@@ -188,15 +188,15 @@ def add_turbulence(data):
     for i in range(len(tempindex_list)):
         # print(i)
         if i == list(range(len(tempindex_list)))[-1]:
-            _ = [df, [tempindex_list[i], 1 + temp]]
+            _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], 1 + temp]]
         else:
-            _ = [df, [tempindex_list[i], tempindex_list[i + 1]]]
+            _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], tempindex_list[i + 1]]]
         index_list.append(_)
     with get_context("spawn").Pool() as pool:
         result = pool.map(calculate_turbulence, index_list)
     turbulence_index = pd.DataFrame()
     for step in result:
-        turbulence_index = turbulence_index.append(df)
+        turbulence_index = turbulence_index.append(step)
     # turbulence_index = calculate_turbulence(df)
     df = df.merge(turbulence_index, on="timestamp")
     df = df.sort_values(["timestamp", "tic"]).reset_index(drop=True)
