@@ -5,6 +5,8 @@ import talib as ta
 import numpy as np
 from multiprocessing import get_context, cpu_count
 from fredapi import Fred
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def minto15_alpaca(path):
