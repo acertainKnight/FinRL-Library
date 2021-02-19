@@ -233,7 +233,7 @@ def calculate_turbulence(params):
             & (df_price_pivot.index >= unique_date[i - 63*27])
         ]
         # Drop tickers which has number missing values more than the "oldest" ticker
-        filtered_hist_price = hist_price.iloc[hist_price.isna().sum().min():].dropna(axis=1)
+        filtered_hist_price = hist_price.iloc[int(hist_price.isna().sum().min()):].dropna(axis=1)
         try:
             cov_temp = filtered_hist_price.cov()
         except:
