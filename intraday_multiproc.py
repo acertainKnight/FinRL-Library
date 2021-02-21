@@ -15,7 +15,7 @@ from finrl.marketdata.alpaca_data import preprocess
 # from finrl.preprocessing.preprocessors_multiproc import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
-from finrl.model.models_multiproc import DRLAgent, DRLEnsembleAgent
+from finrl.model.models_multiproc_intraday import DRLAgent, DRLEnsembleAgent
 from finrl.trade.backtest import backtest_plot, backtest_stats
 import os
 import multiprocessing
@@ -33,7 +33,7 @@ def main():
 
     print(config.START_DATE)
     print(config.END_DATE)
-    print(config.SP_500_TICKER)
+    # print(config.SP_500_TICKER)
 
 
     processed = preprocess()

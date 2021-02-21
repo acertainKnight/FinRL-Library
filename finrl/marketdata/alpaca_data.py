@@ -47,7 +47,8 @@ def stack(params):
     df_stacked = pd.DataFrame()
     for root, dirs, _ in os.walk(path):
         for d in dirs:
-            if d != '15min':
+            # if d != '15min':
+            if d != '_test':
                 continue
             else:
                 path_sub = os.path.join(root, d)  # this is the current subfolder
@@ -139,7 +140,7 @@ def stack(params):
                     #     df_full = pd.merge(df_full, data, how='left', left_on='date', right_on='date')
 
                     # print(df_full.columns)
-                    print('Saving: {}'.format(fname[len(path_sub)+1:]))
+                    # print('Saving: {}'.format(fname[len(path_sub)+1:]))
                     # df_full.to_csv(r'/home/nghallmark/FinRL-Library/datasets/ALPACA/{}'.format(fname[53:]))
                     # print('Complete')
                     df_stacked = df_stacked.append(df_full)
@@ -159,7 +160,7 @@ def preprocess():
     # print(len(df.tic.unique()))
     # print(tempindex_list)
     index_list = []
-    for i in range(len(tempindex_list)):
+    for i in range(len(tempindex_list)-1):
         # print(i)
         if i == list(range(len(tempindex_list)))[-1]:
             _ = [path2, [tempindex_list[i], 1 + temp]]
@@ -172,11 +173,17 @@ def preprocess():
     for df in result:
         df_stackFULL = df_stackFULL.append(df)
     print('Saving Final')
+    unique_timesDF = pd.DataFrame({'timestamp': df_stackFULL.timestamp.unique(), 'ones': [1]*len(df_stackFULL.timestamp.unique())})
+    unique_timesDF['cumsum'] = unique_timesDF.ones.cumsum()
+    unique_timesDF['idx_col'] = unique_timesDF['cumsum'] - 1
+    unique_timesDF = unique_timesDF.drop(['ones', 'cumsum'], axis=1)
     df_stackFULL.tic = pd.Categorical(df_stackFULL['tic'])
     df_stackFULL['tic_cat'] = df_stackFULL['tic'].cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
     df_stackFULL = add_turbulence(df_stackFULL)
-    print(df_stackFULL.head())
+    df_stackFULL = pd.merge(df_stackFULL, unique_timesDF, how='left', on='timestamp')
+    df_stackFULL.set_index('idx_col', inplace=True)
+    # df_stackFULL = df_stackFULL.drop('idx_col', axis=1)
     return df_stackFULL
 
 def add_turbulence(data):
@@ -227,7 +234,13 @@ def calculate_turbulence(params):
     turbulence_index = [0] * start
     # turbulence_index = [0]
     count = 0
+    _t = 0
     for i in range(start, len(unique_date)):
+        rem = len(unique_date) - _t
+        if rem % 500 == 0:
+            print(rem)
+        elif rem < 50:
+            print(rem)
         current_price = df_price_pivot[df_price_pivot.index == unique_date[i]]
         # use one year rolling window to calcualte covariance
         hist_price = df_price_pivot[
@@ -258,6 +271,7 @@ def calculate_turbulence(params):
         else:
             turbulence_temp = 0
         turbulence_index.append(turbulence_temp)
+        _t += 1
     print(len(df_price_pivot.index))
     print(len(turbulence_index))
     turbulence_index = pd.DataFrame(

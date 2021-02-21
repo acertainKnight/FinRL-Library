@@ -133,7 +133,7 @@ class StockTradingEnv(gym.Env):
             if self.state[index+1]>0: 
                 #Buy only if the price is > 0 (no missing data in this particular date)       
                 available_amount = self.state[0] // self.state[index+1]
-                # print('available_amount:{}'.format(available_amount))
+                print('available_amount:{}'.format(available_amount))
                 
                 #update balance
                 buy_num_shares = min(available_amount, action)
@@ -177,14 +177,14 @@ class StockTradingEnv(gym.Env):
             df_total_value = pd.DataFrame(self.asset_memory)
             tot_reward = self.state[0]+sum(np.array(self.state[1:(self.stock_dim+1)])*np.array(self.state[(self.stock_dim+1):(self.stock_dim*2+1)]))- self.initial_amount 
             df_total_value.columns = ['account_value']
-            df_total_value['date'] = self.date_memory
+            df_total_value['timestamp'] = self.date_memory
             df_total_value['daily_return']=df_total_value['account_value'].pct_change(1)
             if df_total_value['daily_return'].std() !=0:
                 sharpe = (252**0.5)*df_total_value['daily_return'].mean()/ \
                       df_total_value['daily_return'].std()
             df_rewards = pd.DataFrame(self.rewards_memory)
             df_rewards.columns = ['account_rewards']
-            df_rewards['date'] = self.date_memory[:-1]
+            df_rewards['timestamp'] = self.date_memory[:-1]
             if self.episode % self.print_verbosity == 0:
                 print(f"day: {self.day}, episode: {self.episode}")
                 print(f"begin_total_asset: {self.asset_memory[0]:0.2f}")
@@ -225,7 +225,7 @@ class StockTradingEnv(gym.Env):
                     actions=np.array([-self.hmax]*self.stock_dim)
             begin_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(self.stock_dim+1)])*np.array(self.state[(self.stock_dim+1):(self.stock_dim*2+1)]))
-            #print("begin_total_asset:{}".format(begin_total_asset))
+            print("begin_total_asset:{}".format(begin_total_asset))
             
             argsort_actions = np.argsort(actions)
             
@@ -233,20 +233,20 @@ class StockTradingEnv(gym.Env):
             buy_index = argsort_actions[::-1][:np.where(actions > 0)[0].shape[0]]
 
             for index in sell_index:
-                # print(f"Num shares before: {self.state[index+self.stock_dim+1]}")
-                # print(f'take sell action before : {actions[index]}')
+                print(f"Num shares before: {self.state[index+self.stock_dim+1]}")
+                print(f'take sell action before : {actions[index]}')
                 actions[index] = self._sell_stock(index, actions[index]) * (-1)
-                # print(f'take sell action after : {actions[index]}')
-                # print(f"Num shares after: {self.state[index+self.stock_dim+1]}")
+                print(f'take sell action after : {actions[index]}')
+                print(f"Num shares after: {self.state[index+self.stock_dim+1]}")
 
             for index in buy_index:
-                # print('take buy action: {}'.format(actions[index]))
+                print('take buy action: {}'.format(actions[index]))
                 actions[index] = self._buy_stock(index, actions[index])
 
             self.actions_memory.append(actions)
 
             self.day += 1
-            self.data = self.df.loc[self.day,:]    
+            self.data = self.df.loc[self.day,:]
             if self.turbulence_threshold is not None:
                 # print(self.model_name, self.data['turbulence'])
                 # print(self.model_name, self.data)
@@ -296,14 +296,11 @@ class StockTradingEnv(gym.Env):
         if self.initial:
             # For Initial State
             if len(self.df.tic.unique())>1:
-                for tech in self.tech_indicator_list:
-                    print(tech)
-                    print(self.data[tech].values)
                 # for multiple stock
                 state = [self.initial_amount] + \
-                         self.data.close.values.tolist() + \
+                         self.data.close.to_numpy().tolist() + \
                          [0]*self.stock_dim  + \
-                         sum([self.data[tech].values.tolist() for tech in self.tech_indicator_list ], [])
+                         sum([self.data[tech].to_numpy().tolist() for tech in self.tech_indicator_list ], [])
             else:
                 # for single stock
                 state = [self.initial_amount] + \
@@ -315,9 +312,9 @@ class StockTradingEnv(gym.Env):
             if len(self.df.tic.unique())>1:
                 # for multiple stock
                 state = [self.previous_state[0]] + \
-                         self.data.close.values.tolist() + \
+                         self.data.close.to_numpy().tolist() + \
                          self.previous_state[(self.stock_dim+1):(self.stock_dim*2+1)]  + \
-                         sum([self.data[tech].values.tolist() for tech in self.tech_indicator_list ], [])
+                         sum([self.data[tech].to_numpy().tolist() for tech in self.tech_indicator_list ], [])
             else:
                 # for single stock
                 state = [self.previous_state[0]] + \
@@ -330,9 +327,9 @@ class StockTradingEnv(gym.Env):
         if len(self.df.tic.unique())>1:
             # for multiple stock
             state =  [self.state[0]] + \
-                      self.data.close.values.tolist() + \
+                      self.data.close.to_numpy().tolist() + \
                       list(self.state[(self.stock_dim+1):(self.stock_dim*2+1)]) + \
-                      sum([self.data[tech].values.tolist() for tech in self.tech_indicator_list ], [])
+                      sum([self.data[tech].to_numpy().tolist() for tech in self.tech_indicator_list ], [])
 
         else:
             # for single stock
@@ -345,9 +342,9 @@ class StockTradingEnv(gym.Env):
 
     def _get_date(self):
         if len(self.df.tic.unique())>1:
-            date = self.data.date.unique()[0]
+            date = self.data.timestamp.unique()[0]
         else:
-            date = self.data.date
+            date = self.data.timestamp
         return date
 
     def save_asset_memory(self):
@@ -355,7 +352,7 @@ class StockTradingEnv(gym.Env):
         asset_list = self.asset_memory
         #print(len(date_list))
         #print(len(asset_list))
-        df_account_value = pd.DataFrame({'date':date_list,'account_value':asset_list})
+        df_account_value = pd.DataFrame({'timestamp':date_list,'account_value':asset_list})
         return df_account_value
 
     def save_action_memory(self):
@@ -363,17 +360,17 @@ class StockTradingEnv(gym.Env):
             # date and close price length must match actions length
             date_list = self.date_memory[:-1]
             df_date = pd.DataFrame(date_list)
-            df_date.columns = ['date']
+            df_date.columns = ['timestamp']
             
             action_list = self.actions_memory
             df_actions = pd.DataFrame(action_list)
             df_actions.columns = self.data.tic.values
-            df_actions.index = df_date.date
+            df_actions.index = df_date.timestamp
             #df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
         else:
             date_list = self.date_memory[:-1]
             action_list = self.actions_memory
-            df_actions = pd.DataFrame({'date':date_list,'actions':action_list})
+            df_actions = pd.DataFrame({'timestamp':date_list,'actions':action_list})
         return df_actions
 
     def _seed(self, seed=None):
