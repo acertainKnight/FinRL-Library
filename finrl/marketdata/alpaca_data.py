@@ -47,8 +47,8 @@ def stack(params):
     df_stacked = pd.DataFrame()
     for root, dirs, _ in os.walk(path):
         for d in dirs:
-            # if d != '15min':
-            if d != '_test':
+            if d != '15min':
+            # if d != '_test':
                 continue
             else:
                 path_sub = os.path.join(root, d)  # this is the current subfolder
