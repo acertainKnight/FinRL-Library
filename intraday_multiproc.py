@@ -101,10 +101,10 @@ def main():
         "learning_rate": 0.001
     }
 
-    timesteps_dict = {'a2c': 4000,
-                      'ppo': 4000,
-                      'ddpg': 4000,
-                      'td3': 4000
+    timesteps_dict = {'a2c': 100000,
+                      'ppo': 100000,
+                      'ddpg': 100000,
+                      'td3': 100000
                       }
 
     df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,
