@@ -84,7 +84,7 @@ class FeatureEngineer:
             df = self.add_user_defined_feature(df)
             print("Successfully added user defined features")
 #         df = df.shift(1)
-        df = self.standardize_dates(df)
+#         df = self.standardize_dates(df)
         # fill the missing values at the beginning and the end
         df.replace([np.inf, -np.inf], np.nan)
         df = df.fillna(method="bfill").fillna(method="ffill")

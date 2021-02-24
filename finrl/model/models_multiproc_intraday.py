@@ -324,6 +324,9 @@ class DRLEnsembleAgent:
 
             train = data_split(self.df, start=self.train_period[0],
                                end=self.unique_trade_date[i - self.rebalance_window - self.validation_window])
+
+            train.to_csv(r'_traindata.csv')
+            train = r'_traindata.csv'
             self.train_env = DummyVecEnv([lambda: StockTradingEnv(train,
                                                                   self.stock_dim,
                                                                   self.hmax,
@@ -339,6 +342,8 @@ class DRLEnsembleAgent:
             validation = data_split(self.df,
                                     start=self.unique_trade_date[i - self.rebalance_window - self.validation_window],
                                     end=self.unique_trade_date[i - self.rebalance_window])
+            validation.to_csv(r'_validdata.csv')
+            validation = r'_validdata.csv'
             ############## Environment Setup ends ##############
 
             ############## Training and Validation starts ##############
@@ -429,6 +434,8 @@ class DRLEnsembleAgent:
             # Environment setup for model retraining up to first trade date
             train_full = data_split(self.df, start=self.train_period[0],
                                     end=self.unique_trade_date[i - self.rebalance_window])
+            train_full.to_csv(r'_trainFULLdata.csv')
+            train_full = r'_trainFULLdata.csv'
             self.train_full_env = DummyVecEnv([lambda: StockTradingEnv(train_full,
                                                                        self.stock_dim,
                                                                        self.hmax,

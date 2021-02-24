@@ -25,8 +25,8 @@ from finrl.config import config # loads API Keys as environment variables
 def main():
     api = tradeapi.REST()
 
-    DATADIR = os.path.join(os.getcwd(),'datasets/ALPACA', 'PENNY_STOCKS_2') # download directory for the data
-    SYMBOLS = config.PENNY_STOCKS_2# list of symbols we're interested
+    DATADIR = os.path.join(os.getcwd(),'datasets/ALPACA', 'SP500') # download directory for the data
+    SYMBOLS = config.SP_500_TICKER# list of symbols we're interested
     FROM_DATE = '2009-01-01'
     TO_DATE = '2021-01-01'
 
