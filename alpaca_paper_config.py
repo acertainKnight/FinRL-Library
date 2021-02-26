@@ -25,10 +25,12 @@ from finrl.config import config # loads API Keys as environment variables
 def main():
     api = tradeapi.REST()
 
-    DATADIR = os.path.join(os.getcwd(),'datasets/ALPACA', 'SP500') # download directory for the data
+    DATADIR = os.path.join(os.getcwd(),'datasets/ALPACA', 'HEDGE') # download directory for the data
     SYMBOLS = config.HEDGE_TICS# list of symbols we're interested
     FROM_DATE = '2009-01-01'
     TO_DATE = '2021-01-01'
+
+    print(DATADIR)
 
     # create data directory if it doesn't exist
     if not os.path.exists(DATADIR):
