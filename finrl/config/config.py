@@ -2158,3 +2158,32 @@ PENNY_STOCKS_2 = [
     'CLNE',
     'PAA'
 ]
+
+HEDGE_TICS = [
+    'USMV',
+    'LVHD',
+    'SMMV',
+    'DFND',
+    'ICF',
+    'VPU',
+    'XLP',
+    'BSV',
+    'TOTL',
+    'BAR',
+    'QQQ',
+    'TIP',
+    'AGG',
+    'SPY',
+    'DGSIX',
+    'GSG',
+    'GLD',
+    'EDV',
+    'ZROZ',
+    'TLT',
+    'XLU',
+    'XSLV',
+    'GDX',
+    'SHY',
+    'HYLV',
+    'SH'
+]
