@@ -15,6 +15,9 @@ def minto15_alpaca(path):
             path_sub = os.path.join(root, d)  # this is the current subfolder
             for fname in glob.glob(os.path.join(path_sub, '*.csv')):
                 print(fname)
+                if d != 'SP500':
+                    # data file already exists, not necessary to download
+                    continue
                 try:
                     df = pd.read_csv(fname)
                     df['timestamp'] = pd.to_datetime(df['timestamp'], format='%Y-%m-%d %H:%M:%S', utc=True)
@@ -150,10 +153,10 @@ def stack(params):
 def preprocess():
     # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
     # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
-    # path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
-    # path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
-    path = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA/_test"
-    path2 = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA"
+    path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
+    path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
+    # path = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA/_test"
+    # path2 = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
     tempindex_list = list(range(0, temp, int(temp / cpu_count())))
@@ -284,8 +287,8 @@ def calculate_turbulence(params):
 
 
 if __name__ == "__main__":
-    # minto15_alpaca(r"/Users/Nick/Documents/tic_data/datasets/ALPACA")
-    path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
-    path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
-    stack([path2, [0, 2]])
+    minto15_alpaca(r"/Users/Nick/Documents/tic_data/datasets/ALPACA")
+    # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
+    # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
+    # stack([path2, [0, 2]])
 
