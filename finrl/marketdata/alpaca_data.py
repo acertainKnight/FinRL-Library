@@ -185,6 +185,7 @@ def preprocess():
     df_stackFULL.tic = pd.Categorical(df_stackFULL['tic'])
     df_stackFULL['tic_cat'] = df_stackFULL['tic'].cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
+    print('Adding Turbulence')
     df_stackFULL = add_turbulence(df_stackFULL)
     df_stackFULL = pd.merge(df_stackFULL, unique_timesDF, how='left', on='timestamp')
     df_stackFULL.set_index('idx_col', inplace=True)
@@ -199,15 +200,21 @@ def add_turbulence(data):
     """
     df = data.copy()
     temp = len(df.timestamp.unique())
-    tempindex_list = list(range(0, temp, int(temp / cpu_count())))
+    tempindex_list = list(range(0, temp, int(temp / cpu_count() / 3)))
     # print(len(df.tic.unique()))
     # print(tempindex_list)
+    df_price_pivot = df.pivot(index="timestamp", columns="tic", values="close")
+    # use returns to calculate turbulence
+    df_price_pivot = df_price_pivot.pct_change()
+
     index_list = []
     for i in range(len(tempindex_list)-1):
         if i == list(range(len(tempindex_list)))[-1]:
-            _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], temp+1]]
+            # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], temp+1]]
+            _ = [df_price_pivot.iloc[tempindex_list[i], temp + 1]]
         else:
-            _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], tempindex_list[i + 1]]]
+            # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], tempindex_list[i + 1]]]
+            _ = [df_price_pivot.iloc[tempindex_list[i], tempindex_list[i + 1]]]
         index_list.append(_)
     with get_context("spawn").Pool() as pool:
         result = pool.map(calculate_turbulence, index_list)
@@ -222,13 +229,13 @@ def add_turbulence(data):
 def calculate_turbulence(params):
     """calculate turbulence index based on dow 30"""
     # can add other market assets
-    idx = params[1]
-    df = params[0]
-    df_price_pivot = df.pivot(index="timestamp", columns="tic", values="close")
-    # use returns to calculate turbulence
-    df_price_pivot = df_price_pivot.pct_change()
-    df_price_pivot = df_price_pivot.iloc[idx[0]:idx[1], :]
-    df_price_pivot = df_price_pivot.fillna(0)
+    # idx = params[1]
+    df_price_pivot = params[0]
+    # df_price_pivot = df.pivot(index="timestamp", columns="tic", values="close")
+    # # use returns to calculate turbulence
+    # df_price_pivot = df_price_pivot.pct_change()
+    # df_price_pivot = df_price_pivot.iloc[idx[0]:idx[1], :]
+    # df_price_pivot = df_price_pivot.fillna(0)
     unique_date = df_price_pivot.index
     print(len(unique_date))
     # start after a year
