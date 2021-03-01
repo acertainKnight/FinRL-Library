@@ -37,8 +37,8 @@ class StockTradingEnv(gym.Env):
                  mode='',
                  iteration=''):
         self.day = day
-        self.df = df
-        # self.df = pd.read_csv(df, index_col=0, iterator=True, chunksize=1000)
+        # self.df = df
+        self.df = pd.read_csv(df, index_col=0, iterator=True, chunksize=1000)
         self.stock_dim = stock_dim
         self.hmax = hmax
         self.initial_amount = initial_amount
@@ -50,15 +50,15 @@ class StockTradingEnv(gym.Env):
         self.tech_indicator_list = tech_indicator_list
         self.action_space = spaces.Box(low=-1, high=1, shape=(self.action_space,))
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.state_space,))
-        self.data = self.df.loc[self.day, :]
-        # self.data = pd.DataFrame()
-        # for chunk in self.df:
-        #     print(chunk)
-        #     try:
-        #         self.data = self.data.append(chunk.loc[self.day,:])
-        #     except:
-        #         pass
-        #
+        # self.data = self.df.loc[self.day, :]
+        self.data = pd.DataFrame()
+        for chunk in self.df:
+            print(chunk)
+            try:
+                self.data = self.data.append(chunk.loc[self.day,:])
+            except:
+                pass
+
         # print(self.data)
         self.terminal = False
         self.make_plots = make_plots
@@ -262,15 +262,15 @@ class StockTradingEnv(gym.Env):
             self.actions_memory.append(actions)
 
             self.day += 1
-            self.data = self.df.loc[self.day, :]
+            # self.data = self.df.loc[self.day, :]
 
             # self.data = pd.concat([chunk.loc[self.day, :] for chunk in self.df])
-            # self.data = pd.DataFrame()
-            # for chunk in self.df:
-            #     try:
-            #         self.data = self.data.append(chunk.loc[self.day, :])
-            #     except:
-            #         pass
+            self.data = pd.DataFrame()
+            for chunk in self.df:
+                try:
+                    self.data = self.data.append(chunk.loc[self.day, :])
+                except:
+                    pass
             if self.turbulence_threshold is not None:
                 # print(self.model_name, self.data['turbulence'])
                 # print(self.model_name, self.data)
@@ -301,14 +301,14 @@ class StockTradingEnv(gym.Env):
             self.asset_memory = [previous_total_asset]
 
         self.day = 0
-        self.data = self.df.loc[self.day, :]
+        # self.data = self.df.loc[self.day, :]
         # self.data = pd.concat([chunk.loc[self.day, :] for chunk in self.df])
-        # self.data = pd.DataFrame()
-        # for chunk in self.df:
-        #     try:
-        #         self.data = self.data.append(chunk.loc[self.day, :])
-        #     except:
-        #         pass
+        self.data = pd.DataFrame()
+        for chunk in self.df:
+            try:
+                self.data = self.data.append(chunk.loc[self.day, :])
+            except:
+                pass
         self.turbulence = 0
         self.cost = 0
         self.trades = 0
