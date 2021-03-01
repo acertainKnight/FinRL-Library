@@ -211,10 +211,10 @@ def add_turbulence(data):
     for i in range(len(tempindex_list)-1):
         if i == list(range(len(tempindex_list)))[-1]:
             # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], temp+1]]
-            _ = [df_price_pivot.iloc[tempindex_list[i], temp + 1]]
+            _ = [df_price_pivot.iloc[tempindex_list[i]:temp + 1, :]]
         else:
             # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], tempindex_list[i + 1]]]
-            _ = [df_price_pivot.iloc[tempindex_list[i], tempindex_list[i + 1]]]
+            _ = [df_price_pivot.iloc[tempindex_list[i]:tempindex_list[i + 1], :]]
         index_list.append(_)
     with get_context("spawn").Pool() as pool:
         result = pool.map(calculate_turbulence, index_list)
