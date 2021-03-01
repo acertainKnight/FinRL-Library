@@ -211,10 +211,12 @@ def add_turbulence(data):
     for i in range(len(tempindex_list)-1):
         if i == list(range(len(tempindex_list)))[-1]:
             # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], temp+1]]
-            _ = [df_price_pivot.iloc[tempindex_list[i]:temp + 1, :]]
+            _ = [df_price_pivot.iloc[tempindex_list[i]:temp + 1, :], False]
+        elif i == 0:
+            _ = [df_price_pivot.iloc[tempindex_list[i]:tempindex_list[i + 1], :], True]
         else:
             # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], tempindex_list[i + 1]]]
-            _ = [df_price_pivot.iloc[tempindex_list[i]:tempindex_list[i + 1], :]]
+            _ = [df_price_pivot.iloc[tempindex_list[i]:tempindex_list[i + 1], :], False]
         index_list.append(_)
     with get_context("spawn").Pool() as pool:
         result = pool.map(calculate_turbulence, index_list)
@@ -229,7 +231,7 @@ def add_turbulence(data):
 def calculate_turbulence(params):
     """calculate turbulence index based on dow 30"""
     # can add other market assets
-    # idx = params[1]
+    idx = params[1]
     df_price_pivot = params[0]
     # df_price_pivot = df.pivot(index="timestamp", columns="tic", values="close")
     # # use returns to calculate turbulence
@@ -239,7 +241,7 @@ def calculate_turbulence(params):
     unique_date = df_price_pivot.index
     print(len(unique_date))
     # start after a year
-    if idx[0] == 0:
+    if idx:
         start = 63*27
     else:
         start = 0
