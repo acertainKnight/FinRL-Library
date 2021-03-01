@@ -737,6 +737,8 @@ class DRLTesting:
 
             train = data_split(self.df, start=self.train_period[0],
                                end=self.unique_trade_date[i - self.rebalance_window - self.validation_window])
+            train.to_csv(r'_traindata.csv')
+            train = r'_traindata.csv'
 
             self.train_env = DummyVecEnv([lambda: StockTradingEnv(train,
                                                                   self.stock_dim,
@@ -753,6 +755,8 @@ class DRLTesting:
             validation = data_split(self.df,
                                     start=self.unique_trade_date[i - self.rebalance_window - self.validation_window],
                                     end=self.unique_trade_date[i - self.rebalance_window])
+            validation.to_csv(r'_validdata.csv')
+            validation = r'_validdata.csv'
 
             ############## Environment Setup ends ##############
 
@@ -799,13 +803,6 @@ class DRLTesting:
         df_summary = pd.DataFrame(
             [iteration_list, validation_start_date_list, validation_end_date_list, model_use, sharpe_list]).T
         df_summary.columns = ['Iter', 'Val Start', 'Val End', 'Model Used', 'Sharpe']
-
-
-
-
-
-
-
 
     def train_val(self, arguments):
         model = arguments['model']
