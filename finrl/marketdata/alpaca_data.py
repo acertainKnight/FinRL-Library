@@ -50,8 +50,8 @@ def stack(params):
     df_stacked = pd.DataFrame()
     for root, dirs, _ in os.walk(path):
         for d in dirs:
-            # if d != '15min':
-            if d != '_test':
+            if d != '15min':
+            # if d != '_test':
                 continue
             else:
                 path_sub = os.path.join(root, d)  # this is the current subfolder
@@ -153,10 +153,12 @@ def stack(params):
 def preprocess():
     # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
     # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
-    path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
-    path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
+    # path = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA/15min"
+    # path2 = r"/mnt/disks/MNT_DIR/FinRL-Library/datasets/ALPACA"
     # path = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA/_test"
     # path2 = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA"
+    path = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA/15min"
+    path2 = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
     tempindex_list = list(range(0, temp, int(temp / cpu_count())))

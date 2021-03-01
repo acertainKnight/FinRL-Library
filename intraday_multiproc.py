@@ -15,7 +15,7 @@ from finrl.marketdata.alpaca_data import preprocess
 # from finrl.preprocessing.preprocessors_multiproc import FeatureEngineer
 from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
-from finrl.model.models_multiproc_intraday import DRLAgent, DRLEnsembleAgent
+from finrl.model.models_multiproc_intraday import DRLAgent, DRLEnsembleAgent, DRLTesting
 from finrl.trade.backtest import backtest_plot, backtest_stats
 import os
 import multiprocessing
@@ -35,7 +35,6 @@ def main():
     print(config.END_DATE)
     # print(config.SP_500_TICKER)
 
-
     processed = preprocess()
     information_cols = list(processed)
     information_cols.remove('date')
@@ -48,7 +47,7 @@ def main():
 
     env_kwargs = {
         "hmax": 100,
-        "initial_amount": 5000,
+        "initial_amount": 10000,
         # Since in Indonesia the minimum number of shares per trx is 100, then we scaled the initial amount by dividing it with 100
         "buy_cost_pct": 0.00,  # IPOT has 0.19% buy cost
         "sell_cost_pct": 0.00,  # IPOT has 0.29% sell cost
@@ -61,19 +60,26 @@ def main():
 
     }
 
-    rebalance_window = 63*27  # rebalance_window is the number of days to retrain the model
-    validation_window = 63*27  # validation_window is the number of days to do validation and trading (e.g. if validation_window=63, then both validation and trading period will be 63 days)
+    rebalance_window = 63 * 27  # rebalance_window is the number of days to retrain the model
+    validation_window = 63 * 27  # validation_window is the number of days to do validation and trading (e.g. if validation_window=63, then both validation and trading period will be 63 days)
     train_start = config.START_DATE
     train_end = config.START_TRADE_DATE
     val_test_start = config.START_TRADE_DATE
     val_test_end = config.END_DATE
 
-    ensemble_agent = DRLEnsembleAgent(df=processed,
-                                      train_period=(train_start, train_end),
-                                      val_test_period=(val_test_start, val_test_end),
-                                      rebalance_window=rebalance_window,
-                                      validation_window=validation_window,
-                                      **env_kwargs)
+    # ensemble_agent = DRLEnsembleAgent(df=processed,
+    #                                   train_period=(train_start, train_end),
+    #                                   val_test_period=(val_test_start, val_test_end),
+    #                                   rebalance_window=rebalance_window,
+    #                                   validation_window=validation_window,
+    #                                   **env_kwargs)
+
+    ensemble_agent = DRLTesting(df=processed,
+                                train_period=(train_start, train_end),
+                                val_test_period=(val_test_start, val_test_end),
+                                rebalance_window=rebalance_window,
+                                validation_window=validation_window,
+                                **env_kwargs)
 
     A2C_model_kwargs = {
         'n_steps': 5,
@@ -81,37 +87,41 @@ def main():
         'learning_rate': 0.0005
     }
 
-    PPO_model_kwargs = {
-        "ent_coef": 0.01,
-        "n_steps": 2048,
-        "learning_rate": 0.00025,
-        "batch_size": 128
-    }
-
-    DDPG_model_kwargs = {
-        "action_noise": "ornstein_uhlenbeck",
-        "buffer_size": 50000,
-        "learning_rate": 0.000005,
-        "batch_size": 128
-    }
-
-    TD3_model_kwargs = {
-        "batch_size": 100,
-        "buffer_size": 1000000,
-        "learning_rate": 0.001
-    }
+    # PPO_model_kwargs = {
+    #     "ent_coef": 0.01,
+    #     "n_steps": 2048,
+    #     "learning_rate": 0.00025,
+    #     "batch_size": 128
+    # }
+    #
+    # DDPG_model_kwargs = {
+    #     "action_noise": "ornstein_uhlenbeck",
+    #     "buffer_size": 50000,
+    #     "learning_rate": 0.000005,
+    #     "batch_size": 128
+    # }
+    #
+    # TD3_model_kwargs = {
+    #     "batch_size": 100,
+    #     "buffer_size": 1000000,
+    #     "learning_rate": 0.001
+    # }
 
     timesteps_dict = {'a2c': 100000,
-                      'ppo': 100000,
-                      'ddpg': 100000,
-                      'td3': 100000
+                      # 'ppo': 100000,
+                      # 'ddpg': 100000,
+                      # 'td3': 100000
                       }
 
-    df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,
-                                                      PPO_model_kwargs,
-                                                      DDPG_model_kwargs,
-                                                      TD3_model_kwargs,
-                                                      timesteps_dict)
+    # df_summary = ensemble_agent.run_ensemble_strategy(A2C_model_kwargs,
+    #                                                   PPO_model_kwargs,
+    #                                                   DDPG_model_kwargs,
+    #                                                   TD3_model_kwargs,
+    #                                                   timesteps_dict)
+
+    df_summary = ensemble_agent.run_strategy('a2c',
+                                             A2C_model_kwargs,
+                                             timesteps_dict)
 
     print(df_summary)
 
@@ -126,7 +136,7 @@ def main():
         print(len(unique_trade_date) + 1)
         print(rebalance_window)
         try:
-            temp = pd.read_csv('results/account_value_trade_{}_{}.csv'.format('ensemble', i))
+            temp = pd.read_csv('results/account_value_trade_{}_{}.csv'.format('test1', i))
             df_account_value = df_account_value.append(temp, ignore_index=True)
         except:
             break
