@@ -161,7 +161,7 @@ def preprocess():
     # path2 = r"/Users/Nick/Documents/GitHub/FinRL-Library/datasets/ALPACA"
 
     temp = len(glob.glob(os.path.join(path, '*.csv')))
-    tempindex_list = list(range(0, temp, int(temp / cpu_count())))
+    tempindex_list = list(range(0, temp, int(temp / cpu_count() / 3)))
     # print(len(df.tic.unique()))
     # print(tempindex_list)
     index_list = []
