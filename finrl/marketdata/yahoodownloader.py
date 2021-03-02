@@ -113,7 +113,7 @@ class YahooDownloader:
 
         data_df = data_df.sort_values(by=['date','tic']).reset_index(drop=True)
         data_df.drop_duplicates(inplace=True)
-        
+        data_df.to_csv('dow30.csv')
         return data_df
 
     def select_equal_rows_stock(self, df):

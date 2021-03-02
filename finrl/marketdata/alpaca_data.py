@@ -6,6 +6,7 @@ import numpy as np
 from multiprocessing import get_context, cpu_count
 from fredapi import Fred
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
@@ -32,9 +33,9 @@ def minto15_alpaca(path):
                     df = pd.merge(temp, df, how='left', left_index=True, right_index=True)
                     df = df.fillna(method='ffill').fillna(0)
                     resampled_data = df.resample('15T', closed='right', label='right').agg({'open': 'first',
-                                                                                              'high': 'max',
-                                                                                              'low': 'min',
-                                                                                              'close': 'last'}).dropna()
+                                                                                            'high': 'max',
+                                                                                            'low': 'min',
+                                                                                            'close': 'last'}).dropna()
                     resampled_data.to_csv(fname[:-4] + '-15M' + '.csv')
                 except:
                     print('Failed')
@@ -51,7 +52,7 @@ def stack(params):
     for root, dirs, _ in os.walk(path):
         for d in dirs:
             if d != '15min':
-            # if d != '_test':
+                # if d != '_test':
                 continue
             else:
                 path_sub = os.path.join(root, d)  # this is the current subfolder
@@ -66,9 +67,9 @@ def stack(params):
                     df_raw = df_raw.set_index(datetime_index)
                     df_raw = df_raw.drop('Unnamed: 0', axis=1)
                     df_resample60 = df_raw.resample('60T', closed='right', label='right').agg({'open': 'first',
-                                                                                              'high': 'max',
-                                                                                              'low': 'min',
-                                                                                              'close': 'last'}).dropna()
+                                                                                               'high': 'max',
+                                                                                               'low': 'min',
+                                                                                               'close': 'last'}).dropna()
                     # df_resample24 = df_raw.resample('1D', closed='right', label='right').agg({'open': 'first',
                     #                                                                           'high': 'max',
                     #                                                                           'low': 'min',
@@ -103,13 +104,13 @@ def stack(params):
                                               'open_x_x': 'open',
                                               'high_x_x': 'high',
                                               'low_x_x': 'low',
-                                              'close_x_x': 'close',}, axis=1)
+                                              'close_x_x': 'close', }, axis=1)
                     df_full['date'] = df_full.timestamp.dt.date
                     df_full['day'] = df_full.timestamp.dt.dayofweek
                     df_full['week'] = df_full.timestamp.dt.isocalendar().week
                     df_full['hour'] = df_full.timestamp.dt.hour
                     df_full['quarter'] = df_full.timestamp.dt.quarter
-                    tic = fname[len(path_sub)+1:-19]
+                    tic = fname[len(path_sub) + 1:-19]
                     df_full['tic'] = tic
                     df_full = df_full.fillna(method='ffill').fillna(0)
 
@@ -150,6 +151,7 @@ def stack(params):
                     ___ += 1
     return df_stacked
 
+
 def preprocess():
     # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
     # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
@@ -165,7 +167,7 @@ def preprocess():
     # print(len(df.tic.unique()))
     # print(tempindex_list)
     index_list = []
-    for i in range(len(tempindex_list)-1):
+    for i in range(len(tempindex_list) - 1):
         # print(i)
         if i == list(range(len(tempindex_list)))[-1]:
             _ = [path2, [tempindex_list[i], 1 + temp]]
@@ -178,7 +180,8 @@ def preprocess():
     for df in result:
         df_stackFULL = df_stackFULL.append(df)
     print('Saving Final')
-    unique_timesDF = pd.DataFrame({'timestamp': df_stackFULL.timestamp.unique(), 'ones': [1]*len(df_stackFULL.timestamp.unique())})
+    unique_timesDF = pd.DataFrame(
+        {'timestamp': df_stackFULL.timestamp.unique(), 'ones': [1] * len(df_stackFULL.timestamp.unique())})
     unique_timesDF['cumsum'] = unique_timesDF.ones.cumsum()
     unique_timesDF['idx_col'] = unique_timesDF['cumsum'] - 1
     unique_timesDF = unique_timesDF.drop(['ones', 'cumsum'], axis=1)
@@ -186,11 +189,71 @@ def preprocess():
     df_stackFULL['tic_cat'] = df_stackFULL['tic'].cat.codes
     df_stackFULL["date"] = df_stackFULL.date.apply(lambda x: x.strftime("%Y-%m-%d"))
     print('Adding Turbulence')
-    df_stackFULL = add_turbulence(df_stackFULL)
+    df_stackFULL = add_turbulenceDOW30(df_stackFULL)
     df_stackFULL = pd.merge(df_stackFULL, unique_timesDF, how='left', on='timestamp')
     df_stackFULL.set_index('idx_col', inplace=True)
     # df_stackFULL = df_stackFULL.drop('idx_col', axis=1)
     return df_stackFULL
+
+
+def add_turbulenceDOW30(data):
+    """
+    add turbulence index from a precalcualted dataframe
+    :param data: (df) pandas dataframe
+    :return: (df) pandas dataframe
+    """
+    df = data.copy()
+    turbulence_index = calculate_turbulenceDOW30()
+    df = df.merge(turbulence_index, on="date")
+    df = df.sort_values(["timestamp", "tic"]).reset_index(drop=True)
+    return df
+
+
+def calculate_turbulenceDOW30():
+    """calculate turbulence index based on dow 30"""
+    # can add other market assets
+    df = pd.read_csv('finrl/marketdata/_dow30.csv')
+    df_price_pivot = df.pivot(index="date", columns="tic", values="close")
+    # use returns to calculate turbulence
+    df_price_pivot = df_price_pivot.pct_change()
+
+    unique_date = df.date.unique()
+    # start after a year
+    start = 252
+    turbulence_index = [0] * start
+    # turbulence_index = [0]
+    count = 0
+    for i in range(start, len(unique_date)):
+        current_price = df_price_pivot[df_price_pivot.index == unique_date[i]]
+        # use one year rolling window to calcualte covariance
+        hist_price = df_price_pivot[
+            (df_price_pivot.index < unique_date[i])
+            & (df_price_pivot.index >= unique_date[i - 252])
+            ]
+        # Drop tickers which has number missing values more than the "oldest" ticker
+        filtered_hist_price = hist_price.iloc[hist_price.isna().sum().min():].dropna(axis=1)
+
+        cov_temp = filtered_hist_price.cov()
+        current_temp = current_price[[x for x in filtered_hist_price]] - np.mean(filtered_hist_price, axis=0)
+        temp = current_temp.values.dot(np.linalg.pinv(cov_temp)).dot(
+            current_temp.values.T
+        )
+        if temp > 0:
+            count += 1
+            if count > 2:
+                turbulence_temp = temp[0][0]
+            else:
+                # avoid large outlier because of the calculation just begins
+                turbulence_temp = 0
+        else:
+            turbulence_temp = 0
+        turbulence_index.append(turbulence_temp)
+
+    turbulence_index = pd.DataFrame(
+        {"date": df_price_pivot.index, "turbulence": turbulence_index}
+    )
+    return turbulence_index
+
 
 def add_turbulence(data):
     """
@@ -208,7 +271,7 @@ def add_turbulence(data):
     df_price_pivot = df_price_pivot.pct_change()
 
     index_list = []
-    for i in range(len(tempindex_list)-1):
+    for i in range(len(tempindex_list) - 1):
         if i == list(range(len(tempindex_list)))[-1]:
             # _ = [df[['timestamp', 'tic', 'close']], [tempindex_list[i], temp+1]]
             _ = [df_price_pivot.iloc[tempindex_list[i]:temp + 1, :], False]
@@ -228,6 +291,7 @@ def add_turbulence(data):
     df = df.sort_values(["timestamp", "tic"]).reset_index(drop=True)
     return df
 
+
 def calculate_turbulence(params):
     """calculate turbulence index based on dow 30"""
     # can add other market assets
@@ -242,7 +306,7 @@ def calculate_turbulence(params):
     print(len(unique_date))
     # start after a year
     if idx:
-        start = 63*27
+        start = 63 * 27
     else:
         start = 0
     turbulence_index = [0] * start
@@ -259,8 +323,8 @@ def calculate_turbulence(params):
         # use one year rolling window to calcualte covariance
         hist_price = df_price_pivot[
             (df_price_pivot.index < unique_date[i])
-            & (df_price_pivot.index >= unique_date[i - 63*27])
-        ]
+            & (df_price_pivot.index >= unique_date[i - 63 * 27])
+            ]
         # Drop tickers which has number missing values more than the "oldest" ticker
         filtered_hist_price = hist_price.iloc[int(hist_price.isna().sum().min()):].dropna(axis=1)
         try:
@@ -294,12 +358,8 @@ def calculate_turbulence(params):
     return turbulence_index
 
 
-
-
-
 if __name__ == "__main__":
     minto15_alpaca(r"/Users/Nick/Documents/tic_data/datasets/ALPACA")
     # path = r"/Users/Nick/Documents/tic_data/datasets/ALPACA/15min"
     # path2 = r"/Users/Nick/Documents/tic_data/datasets/ALPACA"
     # stack([path2, [0, 2]])
-
